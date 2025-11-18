@@ -200,7 +200,7 @@ def generate_multiple_eans(ean_type: str, count: int) -> list[str]:
             f"Invalid EAN type: '{ean_type}'. Must be 'EAN-8', 'EAN-13', or 'EAN-14'."
         )
 
-    eans = set()
+    eans: set[str] = set()
     while len(eans) < count:
         ean = generate_random_ean(ean_type)
         eans.add(ean)

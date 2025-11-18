@@ -11,7 +11,7 @@ EIC Format: XXYAAAAAAAAAAAAK (16 characters)
 """
 
 import re
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 
 
@@ -189,7 +189,7 @@ def parse_eic_components(eic_code: str) -> Optional[EICComponents]:
         return None
 
 
-def validate_eic_format(eic_code: str) -> Dict[str, any]:
+def validate_eic_format(eic_code: str) -> Dict[str, Any]:
     """Validate the format of an EIC code with detailed error reporting.
 
     Args:
@@ -244,7 +244,7 @@ def validate_eic_format(eic_code: str) -> Dict[str, any]:
     return {'is_valid': is_valid, 'errors': errors, 'components': components if is_valid else None}
 
 
-def is_valid_eic(eic_code: str) -> Dict[str, any]:
+def is_valid_eic(eic_code: str) -> Dict[str, Any]:
     """Main EIC validation function with comprehensive checks.
 
     This is the primary public API for EIC validation.

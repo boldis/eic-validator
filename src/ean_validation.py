@@ -11,7 +11,7 @@ EAN Formats:
 Check Digit Algorithm: Mod 10 with alternating weights of 1 and 3
 """
 
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
 
@@ -175,7 +175,7 @@ def parse_ean_components(ean_code: str) -> Optional[EANComponents]:
         return None
 
 
-def validate_ean_format(ean_code: str) -> Dict[str, any]:
+def validate_ean_format(ean_code: str) -> Dict[str, Any]:
     """Validate the format of an EAN code with detailed error reporting.
 
     Args:
@@ -271,7 +271,7 @@ def validate_ean(ean_code: str) -> Tuple[bool, Optional[str], Optional[str]]:
         return (False, None, error_msg)
 
 
-def is_valid_ean(ean_code: str) -> Dict[str, any]:
+def is_valid_ean(ean_code: str) -> Dict[str, Any]:
     """Comprehensive EAN validation function with detailed results.
 
     Alternative validation function that returns a dictionary with full details.

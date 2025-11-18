@@ -197,7 +197,7 @@ def generate_multiple_eics(country_code: str, entity_type: str, count: int) -> l
     if count <= 0:
         raise ValueError("Count must be a positive integer")
 
-    eics = set()
+    eics: set[str] = set()
     while len(eics) < count:
         eic = generate_eic(country_code, entity_type)
         eics.add(eic)
