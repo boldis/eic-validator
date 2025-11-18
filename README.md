@@ -256,11 +256,17 @@ EAN (European Article Number) codes follow GS1 standards and come in three forma
 - **Usage**: Logistic units, packaging
 
 ### Check Digit Calculation
-EAN codes use the **GS1 Mod 10** algorithm:
-1. Sum digits at odd positions (from right, excluding check digit) and multiply by 3
-2. Sum digits at even positions (from right, excluding check digit)
+EAN codes use the **GS1 Mod 10** algorithm (positions counted from left):
+1. Sum digits at even positions from left (2, 4, 6, ...) and multiply by 3
+2. Sum digits at odd positions from left (1, 3, 5, ...)
 3. Add both sums
 4. Check digit = (10 - (sum mod 10)) mod 10
+
+**Example for `400638133393`:**
+- Odd positions (1,3,5,7,9,11): 4+0+3+1+3+9 = 20
+- Even positions (2,4,6,8,10,12): 0+6+8+3+3+3 = 23 × 3 = 69
+- Total: 20 + 69 = 89
+- Check digit: (10 - 9) mod 10 = **1** → Full EAN: `4006381333931`
 
 ## Development
 

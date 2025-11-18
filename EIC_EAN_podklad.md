@@ -139,19 +139,21 @@ def calculate_eic_check_digit(code_without_check: str) -> str:
 
 ### Algoritmus kontrolního znaku (GS1 Mod 10)
 
-1. **Sečíst číslice na lichých pozicích** (zprava, bez kontrolní číslice) a **vynásobit 3**
-2. **Sečíst číslice na sudých pozicích** (zprava, bez kontrolní číslice)
+Podle GS1 standardu se pozice číslují **zleva doprava** (1, 2, 3, ...):
+
+1. **Sečíst číslice na sudých pozicích zleva** (2, 4, 6, ...) a **vynásobit 3**
+2. **Sečíst číslice na lichých pozicích zleva** (1, 3, 5, ...)
 3. **Sečíst oba výsledky**
 4. **Kontrolní číslice** = `(10 - (součet mod 10)) mod 10`
 
 **Příklad pro `400638133393`:**
 ```
-Pozice (zprava): 12 11 10  9  8  7  6  5  4  3  2  1
-Číslice:          4  0  0  6  3  8  1  3  3  3  9  3
+Pozice zleva:  1  2  3  4  5  6  7  8  9 10 11 12
+Číslice:       4  0  0  6  3  8  1  3  3  3  9  3
 
-Liché pozice (1,3,5,7,9,11): 3+3+3+8+6+0 = 23 → 23 × 3 = 69
-Sudé pozice (2,4,6,8,10,12): 9+3+1+3+0+4 = 20
-Součet: 69 + 20 = 89
+Liché pozice zleva (1,3,5,7,9,11):  4+0+3+1+3+9 = 20
+Sudé pozice zleva (2,4,6,8,10,12):  0+6+8+3+3+3 = 23 → 23 × 3 = 69
+Součet: 20 + 69 = 89
 Kontrolní číslice: (10 - (89 mod 10)) mod 10 = (10 - 9) mod 10 = 1
 
 Výsledek: 4006381333931
@@ -161,12 +163,17 @@ Výsledek: 4006381333931
 ```python
 def calculate_ean_check_digit(code_without_check: str) -> str:
     """Vypočítá kontrolní číslici pro EAN kód pomocí GS1 Mod 10."""
-    odd_sum = sum(int(code_without_check[i]) for i in range(len(code_without_check) - 1, -1, -2))
-    even_sum = sum(int(code_without_check[i]) for i in range(len(code_without_check) - 2, -1, -2))
+    digits = [int(d) for d in code_without_check]
+    total = 0
 
-    total = (odd_sum * 3) + even_sum
+    # Procházíme zleva doprava
+    for i, digit in enumerate(digits):
+        # Sudé pozice (index 1, 3, 5...) dostanou váhu 3
+        # Liché pozice (index 0, 2, 4...) dostanou váhu 1
+        weight = 3 if i % 2 == 1 else 1
+        total += digit * weight
+
     check_digit = (10 - (total % 10)) % 10
-
     return str(check_digit)
 ```
 
