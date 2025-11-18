@@ -330,6 +330,7 @@ eic-validator/
 - **pytest** (8.3.4): Full-featured testing framework
 - **pytest-cov** (6.0.0): Coverage reporting
 - **pytest-asyncio** (0.24.0): Async test support
+- **httpx** (0.28.1): HTTP client required by FastAPI TestClient
 
 ### Code Quality
 - **black** (24.10.0): Opinionated code formatter
