@@ -1,11 +1,10 @@
 """API integration tests for EIC and EAN validation and generation endpoints."""
 
-import pytest
 from fastapi.testclient import TestClient
-from src.main import app
-from src.eic_validation import is_valid_eic
-from src.ean_validation import validate_ean
 
+from src.ean_validation import validate_ean
+from src.eic_validation import is_valid_eic
+from src.main import app
 
 client = TestClient(app)
 
@@ -38,18 +37,12 @@ class TestEICValidationEndpoint:
     def test_validate_valid_eic(self):
         """Test validation of a valid EIC code."""
         # Generate a valid EIC first
-        gen_response = client.post(
-            "/eic/generate",
-            json={"country_code": "27", "entity_type": "X"}
-        )
+        gen_response = client.post("/eic/generate", json={"country_code": "27", "entity_type": "X"})
         assert gen_response.status_code == 201
         valid_eic = gen_response.json()["eic_code"]
 
         # Now validate it
-        response = client.post(
-            "/eic/validate",
-            json={"eic_code": valid_eic}
-        )
+        response = client.post("/eic/validate", json={"eic_code": valid_eic})
         assert response.status_code == 200
         data = response.json()
         assert data["is_valid"] is True
@@ -63,8 +56,7 @@ class TestEICValidationEndpoint:
         """Test validation of EIC with wrong check digit."""
         # Use a 16-char EIC with intentionally wrong check digit
         response = client.post(
-            "/eic/validate",
-            json={"eic_code": "27XGOEPS00000010"}  # 16 chars but wrong check digit
+            "/eic/validate", json={"eic_code": "27XGOEPS00000010"}  # 16 chars but wrong check digit
         )
         assert response.status_code == 200
         data = response.json()
@@ -75,10 +67,7 @@ class TestEICValidationEndpoint:
 
     def test_validate_invalid_eic_wrong_length(self):
         """Test validation of EIC with wrong length."""
-        response = client.post(
-            "/eic/validate",
-            json={"eic_code": "TOOSHORT"}
-        )
+        response = client.post("/eic/validate", json={"eic_code": "TOOSHORT"})
         assert response.status_code == 200
         data = response.json()
         assert data["is_valid"] is False
@@ -86,10 +75,7 @@ class TestEICValidationEndpoint:
 
     def test_validate_invalid_eic_invalid_characters(self):
         """Test validation of EIC with invalid characters."""
-        response = client.post(
-            "/eic/validate",
-            json={"eic_code": "27XG000000000-1Z"}
-        )
+        response = client.post("/eic/validate", json={"eic_code": "27XG000000000-1Z"})
         assert response.status_code == 200
         data = response.json()
         assert data["is_valid"] is False
@@ -97,36 +83,24 @@ class TestEICValidationEndpoint:
     def test_validate_with_hyphens(self):
         """Test that hyphens in EIC are handled correctly."""
         # Generate a valid EIC
-        gen_response = client.post(
-            "/eic/generate",
-            json={"country_code": "27", "entity_type": "X"}
-        )
+        gen_response = client.post("/eic/generate", json={"country_code": "27", "entity_type": "X"})
         eic = gen_response.json()["eic_code"]
 
         # Add hyphens to the EIC
         eic_with_hyphens = f"{eic[:3]}-{eic[3:7]}-{eic[7:11]}-{eic[11:]}"
 
-        response = client.post(
-            "/eic/validate",
-            json={"eic_code": eic_with_hyphens}
-        )
+        response = client.post("/eic/validate", json={"eic_code": eic_with_hyphens})
         assert response.status_code == 200
         # May or may not be valid depending on how hyphens affect length
 
     def test_validate_missing_eic_code(self):
         """Test validation request without eic_code field."""
-        response = client.post(
-            "/eic/validate",
-            json={}
-        )
+        response = client.post("/eic/validate", json={})
         assert response.status_code == 422  # Validation error
 
     def test_validate_empty_eic_code(self):
         """Test validation with empty EIC code."""
-        response = client.post(
-            "/eic/validate",
-            json={"eic_code": ""}
-        )
+        response = client.post("/eic/validate", json={"eic_code": ""})
         # Should fail validation or return invalid
         assert response.status_code in [200, 422]
 
@@ -136,10 +110,7 @@ class TestEICGenerationEndpoint:
 
     def test_generate_valid_eic(self):
         """Test generation of valid EIC code."""
-        response = client.post(
-            "/eic/generate",
-            json={"country_code": "27", "entity_type": "X"}
-        )
+        response = client.post("/eic/generate", json={"country_code": "27", "entity_type": "X"})
         assert response.status_code == 201
         data = response.json()
         assert "eic_code" in data
@@ -153,8 +124,7 @@ class TestEICGenerationEndpoint:
         """Test generation with different country codes."""
         for country_code in ["10", "27", "X1"]:
             response = client.post(
-                "/eic/generate",
-                json={"country_code": country_code, "entity_type": "T"}
+                "/eic/generate", json={"country_code": country_code, "entity_type": "T"}
             )
             assert response.status_code == 201
             data = response.json()
@@ -164,8 +134,7 @@ class TestEICGenerationEndpoint:
         """Test generation with different entity types."""
         for entity_type in ["T", "X", "Z", "A"]:
             response = client.post(
-                "/eic/generate",
-                json={"country_code": "27", "entity_type": entity_type}
+                "/eic/generate", json={"country_code": "27", "entity_type": entity_type}
             )
             assert response.status_code == 201
             data = response.json()
@@ -173,63 +142,42 @@ class TestEICGenerationEndpoint:
 
     def test_generate_eic_invalid_country_code(self):
         """Test generation with invalid country code."""
-        response = client.post(
-            "/eic/generate",
-            json={"country_code": "99", "entity_type": "X"}
-        )
+        response = client.post("/eic/generate", json={"country_code": "99", "entity_type": "X"})
         assert response.status_code == 400
         data = response.json()
         assert "country code" in data["detail"].lower()
 
     def test_generate_eic_invalid_entity_type(self):
         """Test generation with invalid entity type."""
-        response = client.post(
-            "/eic/generate",
-            json={"country_code": "27", "entity_type": "Q"}
-        )
+        response = client.post("/eic/generate", json={"country_code": "27", "entity_type": "Q"})
         assert response.status_code == 400
         data = response.json()
         assert "entity type" in data["detail"].lower()
 
     def test_generate_eic_wrong_length_country_code(self):
         """Test generation with wrong length country code."""
-        response = client.post(
-            "/eic/generate",
-            json={"country_code": "2", "entity_type": "X"}
-        )
+        response = client.post("/eic/generate", json={"country_code": "2", "entity_type": "X"})
         assert response.status_code == 422  # Pydantic validation error
 
     def test_generate_eic_wrong_length_entity_type(self):
         """Test generation with wrong length entity type."""
-        response = client.post(
-            "/eic/generate",
-            json={"country_code": "27", "entity_type": "XY"}
-        )
+        response = client.post("/eic/generate", json={"country_code": "27", "entity_type": "XY"})
         assert response.status_code == 422  # Pydantic validation error
 
     def test_generate_eic_missing_parameters(self):
         """Test generation with missing parameters."""
-        response = client.post(
-            "/eic/generate",
-            json={"country_code": "27"}
-        )
+        response = client.post("/eic/generate", json={"country_code": "27"})
         assert response.status_code == 422
 
     def test_generated_eic_passes_validation(self):
         """Test that generated EIC passes validation endpoint."""
         # Generate EIC
-        gen_response = client.post(
-            "/eic/generate",
-            json={"country_code": "27", "entity_type": "X"}
-        )
+        gen_response = client.post("/eic/generate", json={"country_code": "27", "entity_type": "X"})
         assert gen_response.status_code == 201
         eic = gen_response.json()["eic_code"]
 
         # Validate it
-        val_response = client.post(
-            "/eic/validate",
-            json={"eic_code": eic}
-        )
+        val_response = client.post("/eic/validate", json={"eic_code": eic})
         assert val_response.status_code == 200
         assert val_response.json()["is_valid"] is True
 
@@ -237,10 +185,7 @@ class TestEICGenerationEndpoint:
         """Test that multiple generations produce unique EICs."""
         eics = set()
         for _ in range(20):
-            response = client.post(
-                "/eic/generate",
-                json={"country_code": "27", "entity_type": "X"}
-            )
+            response = client.post("/eic/generate", json={"country_code": "27", "entity_type": "X"})
             assert response.status_code == 201
             eics.add(response.json()["eic_code"])
 
@@ -254,8 +199,7 @@ class TestBulkEICGenerationEndpoint:
     def test_generate_bulk_eics(self):
         """Test bulk generation of EIC codes."""
         response = client.post(
-            "/eic/generate/bulk",
-            json={"country_code": "27", "entity_type": "X", "count": 10}
+            "/eic/generate/bulk", json={"country_code": "27", "entity_type": "X", "count": 10}
         )
         assert response.status_code == 201
         data = response.json()
@@ -266,8 +210,7 @@ class TestBulkEICGenerationEndpoint:
     def test_generate_bulk_eics_uniqueness(self):
         """Test that bulk generated EICs are unique."""
         response = client.post(
-            "/eic/generate/bulk",
-            json={"country_code": "27", "entity_type": "X", "count": 50}
+            "/eic/generate/bulk", json={"country_code": "27", "entity_type": "X", "count": 50}
         )
         assert response.status_code == 201
         eics = response.json()["eic_codes"]
@@ -276,21 +219,19 @@ class TestBulkEICGenerationEndpoint:
     def test_generate_bulk_eics_all_valid(self):
         """Test that all bulk generated EICs are valid."""
         response = client.post(
-            "/eic/generate/bulk",
-            json={"country_code": "10", "entity_type": "T", "count": 20}
+            "/eic/generate/bulk", json={"country_code": "10", "entity_type": "T", "count": 20}
         )
         assert response.status_code == 201
         eics = response.json()["eic_codes"]
 
         for eic in eics:
             result = is_valid_eic(eic)
-            assert result['is_valid'] is True
+            assert result["is_valid"] is True
 
     def test_generate_bulk_eics_same_prefix(self):
         """Test that bulk EICs have same country code and entity type."""
         response = client.post(
-            "/eic/generate/bulk",
-            json={"country_code": "27", "entity_type": "Z", "count": 15}
+            "/eic/generate/bulk", json={"country_code": "27", "entity_type": "Z", "count": 15}
         )
         assert response.status_code == 201
         eics = response.json()["eic_codes"]
@@ -302,32 +243,28 @@ class TestBulkEICGenerationEndpoint:
     def test_generate_bulk_eics_invalid_count_zero(self):
         """Test bulk generation with count of 0."""
         response = client.post(
-            "/eic/generate/bulk",
-            json={"country_code": "27", "entity_type": "X", "count": 0}
+            "/eic/generate/bulk", json={"country_code": "27", "entity_type": "X", "count": 0}
         )
         assert response.status_code == 422  # Pydantic validation
 
     def test_generate_bulk_eics_invalid_count_negative(self):
         """Test bulk generation with negative count."""
         response = client.post(
-            "/eic/generate/bulk",
-            json={"country_code": "27", "entity_type": "X", "count": -5}
+            "/eic/generate/bulk", json={"country_code": "27", "entity_type": "X", "count": -5}
         )
         assert response.status_code == 422  # Pydantic validation
 
     def test_generate_bulk_eics_count_exceeds_limit(self):
         """Test bulk generation with count exceeding limit."""
         response = client.post(
-            "/eic/generate/bulk",
-            json={"country_code": "27", "entity_type": "X", "count": 101}
+            "/eic/generate/bulk", json={"country_code": "27", "entity_type": "X", "count": 101}
         )
         assert response.status_code == 422  # Pydantic validation
 
     def test_generate_bulk_eics_invalid_country_code(self):
         """Test bulk generation with invalid country code."""
         response = client.post(
-            "/eic/generate/bulk",
-            json={"country_code": "99", "entity_type": "X", "count": 5}
+            "/eic/generate/bulk", json={"country_code": "99", "entity_type": "X", "count": 5}
         )
         assert response.status_code == 400
 
@@ -386,10 +323,7 @@ class TestErrorHandling:
 
     def test_422_for_invalid_request_body(self):
         """Test 422 response for invalid request body."""
-        response = client.post(
-            "/eic/validate",
-            json={"invalid_field": "value"}
-        )
+        response = client.post("/eic/validate", json={"invalid_field": "value"})
         assert response.status_code == 422
 
 
@@ -398,10 +332,7 @@ class TestEANValidationEndpoint:
 
     def test_validate_valid_ean8(self):
         """Test validation of a valid EAN-8 code."""
-        response = client.post(
-            "/ean/validate",
-            json={"ean_code": "12345670"}
-        )
+        response = client.post("/ean/validate", json={"ean_code": "12345670"})
         assert response.status_code == 200
         data = response.json()
         assert data["is_valid"] is True
@@ -410,10 +341,7 @@ class TestEANValidationEndpoint:
 
     def test_validate_valid_ean13(self):
         """Test validation of a valid EAN-13 code."""
-        response = client.post(
-            "/ean/validate",
-            json={"ean_code": "4006381333931"}
-        )
+        response = client.post("/ean/validate", json={"ean_code": "4006381333931"})
         assert response.status_code == 200
         data = response.json()
         assert data["is_valid"] is True
@@ -423,8 +351,7 @@ class TestEANValidationEndpoint:
     def test_validate_valid_ean14(self):
         """Test validation of a valid EAN-14 code."""
         response = client.post(
-            "/ean/validate",
-            json={"ean_code": "04006381333938"}
+            "/ean/validate", json={"ean_code": "04006381333931"}  # Fixed: correct check digit is 1
         )
         assert response.status_code == 200
         data = response.json()
@@ -434,10 +361,7 @@ class TestEANValidationEndpoint:
 
     def test_validate_invalid_ean_wrong_check_digit(self):
         """Test validation of EAN with wrong check digit."""
-        response = client.post(
-            "/ean/validate",
-            json={"ean_code": "12345679"}  # Wrong check digit
-        )
+        response = client.post("/ean/validate", json={"ean_code": "12345679"})  # Wrong check digit
         assert response.status_code == 200
         data = response.json()
         assert data["is_valid"] is False
@@ -447,10 +371,7 @@ class TestEANValidationEndpoint:
 
     def test_validate_invalid_ean_wrong_length(self):
         """Test validation of EAN with wrong length."""
-        response = client.post(
-            "/ean/validate",
-            json={"ean_code": "12345"}
-        )
+        response = client.post("/ean/validate", json={"ean_code": "12345"})
         assert response.status_code == 200
         data = response.json()
         assert data["is_valid"] is False
@@ -458,10 +379,7 @@ class TestEANValidationEndpoint:
 
     def test_validate_invalid_ean_non_numeric(self):
         """Test validation of EAN with non-numeric characters."""
-        response = client.post(
-            "/ean/validate",
-            json={"ean_code": "1234567A"}
-        )
+        response = client.post("/ean/validate", json={"ean_code": "1234567A"})
         assert response.status_code == 200
         data = response.json()
         assert data["is_valid"] is False
@@ -469,33 +387,25 @@ class TestEANValidationEndpoint:
 
     def test_validate_ean_with_spaces(self):
         """Test validation handles spaces correctly."""
-        response = client.post(
-            "/ean/validate",
-            json={"ean_code": " 12345670 "}
-        )
+        response = client.post("/ean/validate", json={"ean_code": " 12345670 "})
         assert response.status_code == 200
         data = response.json()
         assert data["is_valid"] is True
 
     def test_validate_ean_with_hyphens(self):
         """Test validation handles hyphens correctly."""
-        response = client.post(
-            "/ean/validate",
-            json={"ean_code": "1234-5670"}
-        )
+        response = client.post("/ean/validate", json={"ean_code": "1234-5670"})
         assert response.status_code == 200
         data = response.json()
         assert data["is_valid"] is True
 
     def test_validate_ean_empty_string(self):
         """Test validation of empty string."""
-        response = client.post(
-            "/ean/validate",
-            json={"ean_code": ""}
-        )
-        assert response.status_code == 200
+        response = client.post("/ean/validate", json={"ean_code": ""})
+        # Empty string fails Pydantic validation (min_length=1 after strip)
+        assert response.status_code == 422
         data = response.json()
-        assert data["is_valid"] is False
+        assert "error" in data
 
 
 class TestEANGenerationEndpoint:
@@ -503,10 +413,7 @@ class TestEANGenerationEndpoint:
 
     def test_generate_ean8(self):
         """Test generation of EAN-8 code."""
-        response = client.post(
-            "/ean/generate",
-            json={"base_code": "1234567", "ean_type": "EAN-8"}
-        )
+        response = client.post("/ean/generate", json={"base_code": "1234567", "ean_type": "EAN-8"})
         assert response.status_code == 201
         data = response.json()
         assert "generated_ean" in data
@@ -521,8 +428,7 @@ class TestEANGenerationEndpoint:
     def test_generate_ean13(self):
         """Test generation of EAN-13 code."""
         response = client.post(
-            "/ean/generate",
-            json={"base_code": "400638133393", "ean_type": "EAN-13"}
+            "/ean/generate", json={"base_code": "400638133393", "ean_type": "EAN-13"}
         )
         assert response.status_code == 201
         data = response.json()
@@ -532,8 +438,7 @@ class TestEANGenerationEndpoint:
     def test_generate_ean14(self):
         """Test generation of EAN-14 code."""
         response = client.post(
-            "/ean/generate",
-            json={"base_code": "0400638133393", "ean_type": "EAN-14"}
+            "/ean/generate", json={"base_code": "0400638133393", "ean_type": "EAN-14"}
         )
         assert response.status_code == 201
         data = response.json()
@@ -542,10 +447,7 @@ class TestEANGenerationEndpoint:
 
     def test_generate_ean_case_insensitive(self):
         """Test that EAN type is case-insensitive."""
-        response = client.post(
-            "/ean/generate",
-            json={"base_code": "1234567", "ean_type": "ean-8"}
-        )
+        response = client.post("/ean/generate", json={"base_code": "1234567", "ean_type": "ean-8"})
         assert response.status_code == 201
         data = response.json()
         assert len(data["generated_ean"]) == 8
@@ -553,44 +455,34 @@ class TestEANGenerationEndpoint:
     def test_generate_ean_invalid_base_code_length(self):
         """Test generation with invalid base code length."""
         response = client.post(
-            "/ean/generate",
-            json={"base_code": "123456", "ean_type": "EAN-8"}  # Too short
+            "/ean/generate", json={"base_code": "123456", "ean_type": "EAN-8"}  # Too short
         )
-        assert response.status_code == 400
+        # Pydantic field validator returns 422 for validation errors
+        assert response.status_code == 422
         data = response.json()
         assert "detail" in data
 
     def test_generate_ean_non_numeric_base_code(self):
         """Test generation with non-numeric base code."""
-        response = client.post(
-            "/ean/generate",
-            json={"base_code": "123456A", "ean_type": "EAN-8"}
-        )
+        response = client.post("/ean/generate", json={"base_code": "123456A", "ean_type": "EAN-8"})
         assert response.status_code == 422  # Pydantic validation error
 
     def test_generate_ean_invalid_type(self):
         """Test generation with invalid EAN type."""
-        response = client.post(
-            "/ean/generate",
-            json={"base_code": "1234567", "ean_type": "EAN-12"}
-        )
+        response = client.post("/ean/generate", json={"base_code": "1234567", "ean_type": "EAN-12"})
         assert response.status_code == 422  # Pydantic validation error
 
     def test_generate_ean_round_trip_validation(self):
         """Test that generated EAN validates correctly."""
         # Generate EAN-13
         gen_response = client.post(
-            "/ean/generate",
-            json={"base_code": "123456789012", "ean_type": "EAN-13"}
+            "/ean/generate", json={"base_code": "123456789012", "ean_type": "EAN-13"}
         )
         assert gen_response.status_code == 201
         generated_ean = gen_response.json()["generated_ean"]
 
         # Validate it
-        val_response = client.post(
-            "/ean/validate",
-            json={"ean_code": generated_ean}
-        )
+        val_response = client.post("/ean/validate", json={"ean_code": generated_ean})
         assert val_response.status_code == 200
         val_data = val_response.json()
         assert val_data["is_valid"] is True
@@ -602,20 +494,14 @@ class TestEANEndpointEdgeCases:
 
     def test_validate_all_zeros_ean8(self):
         """Test validation of all-zeros EAN-8."""
-        response = client.post(
-            "/ean/validate",
-            json={"ean_code": "00000000"}
-        )
+        response = client.post("/ean/validate", json={"ean_code": "00000000"})
         assert response.status_code == 200
         data = response.json()
         assert data["is_valid"] is True
 
     def test_generate_all_zeros_ean8(self):
         """Test generation with all-zeros base code."""
-        response = client.post(
-            "/ean/generate",
-            json={"base_code": "0000000", "ean_type": "EAN-8"}
-        )
+        response = client.post("/ean/generate", json={"base_code": "0000000", "ean_type": "EAN-8"})
         assert response.status_code == 201
         data = response.json()
         assert data["generated_ean"] == "00000000"
@@ -623,8 +509,7 @@ class TestEANEndpointEdgeCases:
     def test_generate_all_nines_ean13(self):
         """Test generation with all-nines base code."""
         response = client.post(
-            "/ean/generate",
-            json={"base_code": "999999999999", "ean_type": "EAN-13"}
+            "/ean/generate", json={"base_code": "999999999999", "ean_type": "EAN-13"}
         )
         assert response.status_code == 201
         # Should generate valid EAN
@@ -635,10 +520,7 @@ class TestEANEndpointEdgeCases:
     def test_multiple_consecutive_requests(self):
         """Test multiple consecutive requests work correctly."""
         for _ in range(10):
-            response = client.post(
-                "/ean/validate",
-                json={"ean_code": "12345670"}
-            )
+            response = client.post("/ean/validate", json={"ean_code": "12345670"})
             assert response.status_code == 200
             data = response.json()
             assert data["is_valid"] is True

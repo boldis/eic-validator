@@ -7,25 +7,93 @@ import secrets
 import string
 from typing import Set
 
-from .eic_validation import calculate_eic_check_digit, is_valid_eic
-
+from .eic_validation import calculate_eic_check_digit
 
 # ENTSO-E valid country codes (2-character codes)
 # Based on European countries participating in ENTSO-E
 VALID_COUNTRY_CODES: Set[str] = {
     # Central Europe
-    "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
     # Regional codes
-    "20", "21", "22", "23", "24", "25", "26", "27", "28", "29",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25",
+    "26",
+    "27",
+    "28",
+    "29",
     # Additional codes
-    "30", "31", "32", "33", "34", "35", "36", "37", "38", "39",
+    "30",
+    "31",
+    "32",
+    "33",
+    "34",
+    "35",
+    "36",
+    "37",
+    "38",
+    "39",
     # Extended codes
-    "40", "41", "42", "43", "44", "45", "46", "47", "48", "49",
-    "50", "51", "52", "53", "54", "55", "56", "57", "58", "59",
+    "40",
+    "41",
+    "42",
+    "43",
+    "44",
+    "45",
+    "46",
+    "47",
+    "48",
+    "49",
+    "50",
+    "51",
+    "52",
+    "53",
+    "54",
+    "55",
+    "56",
+    "57",
+    "58",
+    "59",
     # Alphanumeric codes for specific regions
-    "X1", "X2", "X3", "X4", "X5", "X6", "X7", "X8", "X9",
-    "Y1", "Y2", "Y3", "Y4", "Y5", "Y6", "Y7", "Y8", "Y9",
-    "Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9",
+    "X1",
+    "X2",
+    "X3",
+    "X4",
+    "X5",
+    "X6",
+    "X7",
+    "X8",
+    "X9",
+    "Y1",
+    "Y2",
+    "Y3",
+    "Y4",
+    "Y5",
+    "Y6",
+    "Y7",
+    "Y8",
+    "Y9",
+    "Z1",
+    "Z2",
+    "Z3",
+    "Z4",
+    "Z5",
+    "Z6",
+    "Z7",
+    "Z8",
+    "Z9",
 }
 
 # ENTSO-E valid entity types (single character)
@@ -50,17 +118,28 @@ VALID_ENTITY_TYPES: Set[str] = {
     "P",  # Production unit
     "S",  # Substation
     # Numeric entity types
-    "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "0",
 }
 
 
 class InvalidCountryCodeError(ValueError):
     """Exception raised for invalid country codes."""
+
     pass
 
 
 class InvalidEntityTypeError(ValueError):
     """Exception raised for invalid entity types."""
+
     pass
 
 
@@ -129,7 +208,7 @@ def _generate_base_identifier() -> str:
     # Character set: uppercase letters and digits
     charset = string.ascii_uppercase + string.digits
     # Generate 12 random characters
-    identifier = ''.join(secrets.choice(charset) for _ in range(12))
+    identifier = "".join(secrets.choice(charset) for _ in range(12))
     return identifier
 
 
@@ -197,7 +276,7 @@ def generate_multiple_eics(country_code: str, entity_type: str, count: int) -> l
     if count <= 0:
         raise ValueError("Count must be a positive integer")
 
-    eics = set()
+    eics: set[str] = set()
     while len(eics) < count:
         eic = generate_eic(country_code, entity_type)
         eics.add(eic)

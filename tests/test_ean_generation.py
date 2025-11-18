@@ -1,15 +1,16 @@
 """Comprehensive unit tests for EAN generation logic."""
 
 import pytest
+
 from src.ean_generation import (
-    generate_ean,
-    generate_random_ean,
-    generate_multiple_eans,
-    is_valid_ean_type,
-    InvalidEANTypeError,
     InvalidBaseCodeError,
-    _validate_base_code,
+    InvalidEANTypeError,
     _generate_random_base,
+    _validate_base_code,
+    generate_ean,
+    generate_multiple_eans,
+    generate_random_ean,
+    is_valid_ean_type,
 )
 from src.ean_validation import validate_ean
 
@@ -253,7 +254,7 @@ class TestKnownEANs:
         """Test generation matches known EAN-13 codes."""
         test_cases = [
             ("400638133393", "4006381333931"),
-            ("501234567890", "5012345678905"),
+            ("501234567890", "5012345678900"),  # Fixed: correct check digit is 0
         ]
 
         for base_code, expected_ean in test_cases:
@@ -307,7 +308,9 @@ class TestIntegrationWithValidation:
             for _ in range(20):  # Test multiple times
                 ean = generate_random_ean(ean_type)
                 is_valid, format_type, error = validate_ean(ean)
-                assert is_valid is True, f"Generated {ean_type} {ean} should be valid, error: {error}"
+                assert (
+                    is_valid is True
+                ), f"Generated {ean_type} {ean} should be valid, error: {error}"
                 assert format_type == ean_type
 
     def test_bulk_generation_all_valid(self):

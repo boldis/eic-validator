@@ -1,17 +1,14 @@
 """Comprehensive unit tests for EAN validation logic."""
 
 import pytest
+
 from src.ean_validation import (
     calculate_ean_check_digit,
-    validate_ean_check_digit,
-    validate_ean,
-    parse_ean_components,
-    validate_ean_format,
     is_valid_ean,
-    _calculate_ean_check_digit,
-    EAN_8_LENGTH,
-    EAN_13_LENGTH,
-    EAN_14_LENGTH,
+    parse_ean_components,
+    validate_ean,
+    validate_ean_check_digit,
+    validate_ean_format,
 )
 
 
@@ -23,20 +20,20 @@ class TestCheckDigitCalculation:
         # Known valid EAN-8 codes
         assert calculate_ean_check_digit("1234567") == "0"
         assert calculate_ean_check_digit("9638507") == "4"
-        assert calculate_ean_check_digit("5012345") == "7"
+        assert calculate_ean_check_digit("5012345") == "2"  # Fixed: correct check digit is 2
 
     def test_ean13_check_digit_calculation(self):
         """Test EAN-13 check digit calculation with known values."""
         # Known valid EAN-13 codes
         assert calculate_ean_check_digit("400638133393") == "1"
-        assert calculate_ean_check_digit("501234567890") == "5"
-        assert calculate_ean_check_digit("978014300723") == "2"
+        assert calculate_ean_check_digit("501234567890") == "0"  # Fixed: correct check digit is 0
+        assert calculate_ean_check_digit("978014300723") == "4"  # Fixed: correct check digit is 4
 
     def test_ean14_check_digit_calculation(self):
         """Test EAN-14 check digit calculation with known values."""
         # Known valid EAN-14 codes
-        assert calculate_ean_check_digit("0400638133393") == "8"
-        assert calculate_ean_check_digit("1234567890123") == "8"
+        assert calculate_ean_check_digit("0400638133393") == "1"  # Fixed: correct check digit is 1
+        assert calculate_ean_check_digit("1234567890123") == "1"  # Fixed: correct check digit is 1
 
     def test_check_digit_invalid_length(self):
         """Test that invalid length raises ValueError."""
@@ -64,11 +61,11 @@ class TestCheckDigitValidation:
     def test_validate_ean13_valid(self):
         """Test validation of valid EAN-13 codes."""
         assert validate_ean_check_digit("4006381333931") is True
-        assert validate_ean_check_digit("5012345678905") is True
+        assert validate_ean_check_digit("5012345678900") is True  # Fixed: correct full code
 
     def test_validate_ean14_valid(self):
         """Test validation of valid EAN-14 codes."""
-        assert validate_ean_check_digit("04006381333938") is True
+        assert validate_ean_check_digit("04006381333931") is True  # Fixed: correct full code
 
     def test_validate_invalid_check_digit(self):
         """Test validation fails with incorrect check digit."""
@@ -108,10 +105,10 @@ class TestEANComponents:
 
     def test_parse_ean14_components(self):
         """Test parsing EAN-14 components."""
-        components = parse_ean_components("04006381333938")
+        components = parse_ean_components("04006381333931")  # Fixed: correct full code
         assert components is not None
         assert components.data_part == "0400638133393"
-        assert components.check_digit == "8"
+        assert components.check_digit == "1"  # Fixed: correct check digit
         assert components.format == "EAN-14"
 
     def test_parse_invalid_length(self):
@@ -144,7 +141,9 @@ class TestEANValidation:
 
     def test_validate_ean14_valid(self):
         """Test validation of valid EAN-14."""
-        is_valid, format_type, error = validate_ean("04006381333938")
+        is_valid, format_type, error = validate_ean(
+            "04006381333931"
+        )  # Fixed: correct check digit is 1
         assert is_valid is True
         assert format_type == "EAN-14"
         assert error is None
@@ -201,34 +200,34 @@ class TestEANFormatValidation:
     def test_format_validation_valid_ean8(self):
         """Test format validation for valid EAN-8."""
         result = validate_ean_format("12345670")
-        assert result['is_valid'] is True
-        assert result['format'] == "EAN-8"
-        assert len(result['errors']) == 0
-        assert result['components'] is not None
+        assert result["is_valid"] is True
+        assert result["format"] == "EAN-8"
+        assert len(result["errors"]) == 0
+        assert result["components"] is not None
 
     def test_format_validation_valid_ean13(self):
         """Test format validation for valid EAN-13."""
         result = validate_ean_format("4006381333931")
-        assert result['is_valid'] is True
-        assert result['format'] == "EAN-13"
-        assert len(result['errors']) == 0
+        assert result["is_valid"] is True
+        assert result["format"] == "EAN-13"
+        assert len(result["errors"]) == 0
 
     def test_format_validation_invalid_check_digit(self):
         """Test format validation detects invalid check digit."""
         result = validate_ean_format("12345679")
-        assert result['is_valid'] is False
-        assert "Invalid check digit" in result['errors']
+        assert result["is_valid"] is False
+        assert "Invalid check digit" in result["errors"]
 
     def test_format_validation_non_numeric(self):
         """Test format validation detects non-numeric input."""
         result = validate_ean_format("ABC12345")
-        assert result['is_valid'] is False
-        assert any("numeric digits" in err for err in result['errors'])
+        assert result["is_valid"] is False
+        assert any("numeric digits" in err for err in result["errors"])
 
     def test_format_validation_spaces_cleaned(self):
         """Test that spaces are properly cleaned before validation."""
         result = validate_ean_format("  12345670  ")
-        assert result['is_valid'] is True
+        assert result["is_valid"] is True
 
 
 class TestIsValidEAN:
@@ -237,29 +236,29 @@ class TestIsValidEAN:
     def test_is_valid_ean_valid_ean8(self):
         """Test comprehensive validation for valid EAN-8."""
         result = is_valid_ean("12345670")
-        assert result['is_valid'] is True
-        assert result['ean_code'] == "12345670"
-        assert result['format'] == "EAN-8"
-        assert len(result['errors']) == 0
-        assert result['components'] is not None
+        assert result["is_valid"] is True
+        assert result["ean_code"] == "12345670"
+        assert result["format"] == "EAN-8"
+        assert len(result["errors"]) == 0
+        assert result["components"] is not None
 
     def test_is_valid_ean_valid_ean13(self):
         """Test comprehensive validation for valid EAN-13."""
         result = is_valid_ean("4006381333931")
-        assert result['is_valid'] is True
-        assert result['ean_code'] == "4006381333931"
-        assert result['format'] == "EAN-13"
+        assert result["is_valid"] is True
+        assert result["ean_code"] == "4006381333931"
+        assert result["format"] == "EAN-13"
 
     def test_is_valid_ean_invalid(self):
         """Test comprehensive validation for invalid EAN."""
         result = is_valid_ean("12345679")
-        assert result['is_valid'] is False
-        assert len(result['errors']) > 0
+        assert result["is_valid"] is False
+        assert len(result["errors"]) > 0
 
     def test_is_valid_ean_normalized(self):
         """Test that EAN code is normalized in response."""
         result = is_valid_ean(" 1234-5670 ")
-        assert result['ean_code'] == "12345670"
+        assert result["ean_code"] == "12345670"
 
 
 class TestEdgeCases:
@@ -321,7 +320,7 @@ class TestRealWorldEANs:
 
     def test_isbn_as_ean13(self):
         """Test ISBN-13 (which is EAN-13 with 978 prefix)."""
-        # ISBN-13: 978-0-14-300723-2 = 9780143007232
-        is_valid, format_type, error = validate_ean("9780143007232")
+        # ISBN-13: 978-0-14-300723-4 = 9780143007234 (Fixed: correct check digit)
+        is_valid, format_type, error = validate_ean("9780143007234")
         assert is_valid is True
         assert format_type == "EAN-13"

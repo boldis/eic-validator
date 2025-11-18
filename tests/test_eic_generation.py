@@ -1,17 +1,18 @@
 """Comprehensive unit tests for EIC generation logic."""
 
 import pytest
+
 from src.eic_generation import (
+    VALID_COUNTRY_CODES,
+    VALID_ENTITY_TYPES,
+    InvalidCountryCodeError,
+    InvalidEntityTypeError,
+    _generate_base_identifier,
+    _validate_eic_generation_params,
     generate_eic,
     generate_multiple_eics,
     is_valid_country_code,
     is_valid_entity_type,
-    _generate_base_identifier,
-    _validate_eic_generation_params,
-    InvalidCountryCodeError,
-    InvalidEntityTypeError,
-    VALID_COUNTRY_CODES,
-    VALID_ENTITY_TYPES,
 )
 from src.eic_validation import is_valid_eic
 
@@ -159,8 +160,8 @@ class TestGenerateEIC:
         for _ in range(10):
             eic = generate_eic("27", "X")
             result = is_valid_eic(eic)
-            assert result['is_valid'] is True
-            assert len(result['errors']) == 0
+            assert result["is_valid"] is True
+            assert len(result["errors"]) == 0
 
     def test_generate_eic_different_country_codes(self):
         """Test generation with different country codes."""
@@ -227,7 +228,7 @@ class TestGenerateMultipleEICs:
         eics = generate_multiple_eics("10", "T", 15)
         for eic in eics:
             result = is_valid_eic(eic)
-            assert result['is_valid'] is True
+            assert result["is_valid"] is True
 
     def test_generate_multiple_eics_same_prefix(self):
         """Test that all EICs have same country code and entity type."""
@@ -261,32 +262,32 @@ class TestIntegrationWithValidation:
         for entity_type in list(VALID_ENTITY_TYPES)[:10]:  # Test subset
             eic = generate_eic("27", entity_type)
             result = is_valid_eic(eic)
-            assert result['is_valid'] is True, f"Failed for entity type: {entity_type}"
+            assert result["is_valid"] is True, f"Failed for entity type: {entity_type}"
 
     def test_all_country_codes_generate_valid_eics(self):
         """Test that all country codes produce valid EICs."""
         for country_code in list(VALID_COUNTRY_CODES)[:10]:  # Test subset
             eic = generate_eic(country_code, "X")
             result = is_valid_eic(eic)
-            assert result['is_valid'] is True, f"Failed for country code: {country_code}"
+            assert result["is_valid"] is True, f"Failed for country code: {country_code}"
 
     def test_generated_eic_components(self):
         """Test that generated EIC components are correctly parsed."""
         eic = generate_eic("27", "X")
         result = is_valid_eic(eic)
-        assert result['components'] is not None
-        assert result['components'].office_id == "27"
-        assert result['components'].entity_type == "X"
-        assert len(result['components'].individual_id) == 12
+        assert result["components"] is not None
+        assert result["components"].office_id == "27"
+        assert result["components"].entity_type == "X"
+        assert len(result["components"].individual_id) == 12
 
     def test_bulk_generation_validation(self):
         """Test bulk generation with validation."""
         eics = generate_multiple_eics("10", "T", 100)
         for eic in eics:
             result = is_valid_eic(eic)
-            assert result['is_valid'] is True
-            assert result['components'].office_id == "10"
-            assert result['components'].entity_type == "T"
+            assert result["is_valid"] is True
+            assert result["components"].office_id == "10"
+            assert result["components"].entity_type == "T"
 
 
 class TestEdgeCases:
@@ -296,14 +297,14 @@ class TestEdgeCases:
         """Test generation with numeric entity types."""
         eic = generate_eic("27", "1")
         result = is_valid_eic(eic)
-        assert result['is_valid'] is True
+        assert result["is_valid"] is True
         assert eic[2] == "1"
 
     def test_alphanumeric_country_code(self):
         """Test generation with alphanumeric country codes."""
         eic = generate_eic("X1", "T")
         result = is_valid_eic(eic)
-        assert result['is_valid'] is True
+        assert result["is_valid"] is True
         assert eic[:2] == "X1"
 
     def test_mixed_case_inputs(self):

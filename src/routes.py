@@ -1,54 +1,51 @@
 """API routes for EIC validation and generation."""
 
 from fastapi import APIRouter, HTTPException, status
-from typing import Dict, Any
+from pydantic import BaseModel, Field
 
-from .models import (
-    EICValidationRequest,
-    EICValidationResult,
-    EICComponentsResponse,
-    EANValidationRequest,
-    EANValidationResponse,
-    EANGenerationRequest,
-    EANGenerationResponse,
-)
-from .eic_validation import is_valid_eic
+from .ean_generation import InvalidBaseCodeError, InvalidEANTypeError, generate_ean
+from .ean_validation import validate_ean
 from .eic_generation import (
-    generate_eic,
-    generate_multiple_eics,
     InvalidCountryCodeError,
     InvalidEntityTypeError,
+    generate_eic,
+    generate_multiple_eics,
 )
-from .ean_validation import validate_ean
-from .ean_generation import (
-    generate_ean,
-    InvalidEANTypeError,
-    InvalidBaseCodeError,
+from .eic_validation import is_valid_eic
+from .models import (
+    EANGenerationRequest,
+    EANGenerationResponse,
+    EANValidationRequest,
+    EANValidationResponse,
+    EICComponentsResponse,
+    EICValidationRequest,
+    EICValidationResult,
 )
-from pydantic import BaseModel, Field
 
 
 # EIC Generation Models
 class EICGenerationRequest(BaseModel):
     """Request model for EIC generation."""
+
     country_code: str = Field(
         ...,
         description="2-character country code (e.g., '27' for Czech Republic)",
         min_length=2,
         max_length=2,
-        examples=["27", "10", "X1"]
+        examples=["27", "10", "X1"],
     )
     entity_type: str = Field(
         ...,
         description="Single character entity type (e.g., 'T', 'X', 'Z')",
         min_length=1,
         max_length=1,
-        examples=["X", "T", "Z"]
+        examples=["X", "T", "Z"],
     )
 
 
 class EICGenerationResult(BaseModel):
     """Response model for EIC generation."""
+
     eic_code: str = Field(..., description="Generated EIC code")
     is_valid: bool = Field(..., description="Confirmation that generated EIC is valid")
     components: EICComponentsResponse = Field(..., description="Parsed components of generated EIC")
@@ -56,13 +53,19 @@ class EICGenerationResult(BaseModel):
 
 class BulkEICGenerationRequest(BaseModel):
     """Request model for bulk EIC generation."""
-    country_code: str = Field(..., description="2-character country code", min_length=2, max_length=2)
-    entity_type: str = Field(..., description="Single character entity type", min_length=1, max_length=1)
+
+    country_code: str = Field(
+        ..., description="2-character country code", min_length=2, max_length=2
+    )
+    entity_type: str = Field(
+        ..., description="Single character entity type", min_length=1, max_length=1
+    )
     count: int = Field(..., description="Number of EICs to generate", ge=1, le=100)
 
 
 class BulkEICGenerationResult(BaseModel):
     """Response model for bulk EIC generation."""
+
     eic_codes: list[str] = Field(..., description="List of generated EIC codes")
     count: int = Field(..., description="Number of EICs generated")
 
@@ -112,25 +115,25 @@ async def validate_eic_endpoint(request: EICValidationRequest) -> EICValidationR
 
         # Convert components to response model if available
         components_response = None
-        if result['components'] is not None:
+        if result["components"] is not None:
             components_response = EICComponentsResponse(
-                office_id=result['components'].office_id,
-                entity_type=result['components'].entity_type,
-                individual_id=result['components'].individual_id,
-                check_digit=result['components'].check_digit,
+                office_id=result["components"].office_id,
+                entity_type=result["components"].entity_type,
+                individual_id=result["components"].individual_id,
+                check_digit=result["components"].check_digit,
             )
 
         return EICValidationResult(
-            is_valid=result['is_valid'],
-            eic_code=result['eic_code'],
-            errors=result['errors'],
+            is_valid=result["is_valid"],
+            eic_code=result["eic_code"],
+            errors=result["errors"],
             components=components_response,
         )
 
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal error during validation: {str(e)}"
+            detail=f"Internal error during validation: {str(e)}",
         )
 
 
@@ -180,18 +183,18 @@ async def generate_eic_endpoint(request: EICGenerationRequest) -> EICGenerationR
         # Validate the generated EIC to get components
         validation_result = is_valid_eic(eic_code)
 
-        if not validation_result['is_valid']:
+        if not validation_result["is_valid"]:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Generated EIC failed validation - this should not happen"
+                detail="Generated EIC failed validation - this should not happen",
             )
 
         # Convert components to response model
         components_response = EICComponentsResponse(
-            office_id=validation_result['components'].office_id,
-            entity_type=validation_result['components'].entity_type,
-            individual_id=validation_result['components'].individual_id,
-            check_digit=validation_result['components'].check_digit,
+            office_id=validation_result["components"].office_id,
+            entity_type=validation_result["components"].entity_type,
+            individual_id=validation_result["components"].individual_id,
+            check_digit=validation_result["components"].check_digit,
         )
 
         return EICGenerationResult(
@@ -201,23 +204,19 @@ async def generate_eic_endpoint(request: EICGenerationRequest) -> EICGenerationR
         )
 
     except InvalidCountryCodeError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except InvalidEntityTypeError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal error during generation: {str(e)}"
+            detail=f"Internal error during generation: {str(e)}",
         )
 
 
-@router.post("/generate/bulk", response_model=BulkEICGenerationResult, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/generate/bulk", response_model=BulkEICGenerationResult, status_code=status.HTTP_201_CREATED
+)
 async def generate_bulk_eic_endpoint(request: BulkEICGenerationRequest) -> BulkEICGenerationResult:
     """Generate multiple unique EIC codes.
 
@@ -244,36 +243,20 @@ async def generate_bulk_eic_endpoint(request: BulkEICGenerationRequest) -> BulkE
     """
     try:
         # Generate multiple EICs
-        eic_codes = generate_multiple_eics(
-            request.country_code,
-            request.entity_type,
-            request.count
-        )
+        eic_codes = generate_multiple_eics(request.country_code, request.entity_type, request.count)
 
-        return BulkEICGenerationResult(
-            eic_codes=eic_codes,
-            count=len(eic_codes)
-        )
+        return BulkEICGenerationResult(eic_codes=eic_codes, count=len(eic_codes))
 
     except InvalidCountryCodeError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except InvalidEntityTypeError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal error during bulk generation: {str(e)}"
+            detail=f"Internal error during bulk generation: {str(e)}",
         )
 
 
@@ -314,20 +297,18 @@ async def validate_ean_endpoint(request: EANValidationRequest) -> EANValidationR
         # Validate the EAN
         is_valid, ean_format, error_message = validate_ean(request.ean_code)
 
-        return EANValidationResponse(
-            is_valid=is_valid,
-            format=ean_format,
-            error=error_message
-        )
+        return EANValidationResponse(is_valid=is_valid, format=ean_format, error=error_message)
 
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal error during validation: {str(e)}"
+            detail=f"Internal error during validation: {str(e)}",
         )
 
 
-@ean_router.post("/generate", response_model=EANGenerationResponse, status_code=status.HTTP_201_CREATED)
+@ean_router.post(
+    "/generate", response_model=EANGenerationResponse, status_code=status.HTTP_201_CREATED
+)
 async def generate_ean_endpoint(request: EANGenerationRequest) -> EANGenerationResponse:
     """Generate a valid EAN code.
 
@@ -366,17 +347,11 @@ async def generate_ean_endpoint(request: EANGenerationRequest) -> EANGenerationR
         return EANGenerationResponse(generated_ean=generated_ean)
 
     except InvalidBaseCodeError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except InvalidEANTypeError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal error during generation: {str(e)}"
+            detail=f"Internal error during generation: {str(e)}",
         )

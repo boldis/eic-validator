@@ -11,9 +11,8 @@ EIC Format: XXYAAAAAAAAAAAAK (16 characters)
 """
 
 import re
-from typing import Dict, List, Optional
 from dataclasses import dataclass
-
+from typing import Any, Dict, List, Optional
 
 # EIC Format Constants
 EIC_LENGTH = 16
@@ -25,18 +24,19 @@ CHECK_DIGIT_LENGTH = 1
 
 # Regex patterns for EIC components
 # Office identifier: 2 alphanumeric characters
-OFFICE_ID_PATTERN = r'^[0-9A-Z]{2}$'
+OFFICE_ID_PATTERN = r"^[0-9A-Z]{2}$"
 # Entity type: 1 alphanumeric character
-ENTITY_TYPE_PATTERN = r'^[A-Z0-9]$'
+ENTITY_TYPE_PATTERN = r"^[A-Z0-9]$"
 # Individual identifier: 12 alphanumeric characters
-INDIVIDUAL_ID_PATTERN = r'^[0-9A-Z]{12}$'
+INDIVIDUAL_ID_PATTERN = r"^[0-9A-Z]{12}$"
 # Full EIC pattern: 16 alphanumeric characters
-EIC_FULL_PATTERN = r'^[0-9A-Z]{16}$'
+EIC_FULL_PATTERN = r"^[0-9A-Z]{16}$"
 
 
 @dataclass
 class EICComponents:
     """EIC code components."""
+
     office_id: str
     entity_type: str
     individual_id: str
@@ -55,6 +55,7 @@ class EICComponents:
 
 class EICValidationError(Exception):
     """Base exception for EIC validation errors."""
+
     pass
 
 
@@ -70,10 +71,10 @@ def _char_to_value(char: str) -> int:
     Raises:
         ValueError: If character is not valid
     """
-    if '0' <= char <= '9':
+    if "0" <= char <= "9":
         return int(char)
-    elif 'A' <= char <= 'Z':
-        return ord(char) - ord('A') + 10
+    elif "A" <= char <= "Z":
+        return ord(char) - ord("A") + 10
     else:
         raise ValueError(f"Invalid character for EIC calculation: '{char}'")
 
@@ -93,7 +94,7 @@ def _value_to_char(value: int) -> str:
     if 0 <= value <= 9:
         return str(value)
     elif 10 <= value <= 35:
-        return chr(ord('A') + value - 10)
+        return chr(ord("A") + value - 10)
     else:
         raise ValueError(f"Invalid value for EIC character conversion: {value}")
 
@@ -111,7 +112,9 @@ def calculate_eic_check_digit(eic_base: str) -> str:
         ValueError: If base is not 15 characters or contains invalid characters
     """
     if len(eic_base) != EIC_BASE_LENGTH:
-        raise ValueError(f"EIC base must be exactly {EIC_BASE_LENGTH} characters long, got {len(eic_base)}")
+        raise ValueError(
+            f"EIC base must be exactly {EIC_BASE_LENGTH} characters long, got {len(eic_base)}"
+        )
 
     eic_base = eic_base.upper()
     remainder = 0
@@ -182,14 +185,14 @@ def parse_eic_components(eic_code: str) -> Optional[EICComponents]:
             office_id=eic_code[0:2],
             entity_type=eic_code[2],
             individual_id=eic_code[3:15],
-            check_digit=eic_code[15]
+            check_digit=eic_code[15],
         )
         return components
     except Exception:
         return None
 
 
-def validate_eic_format(eic_code: str) -> Dict[str, any]:
+def validate_eic_format(eic_code: str) -> Dict[str, Any]:
     """Validate the format of an EIC code with detailed error reporting.
 
     Args:
@@ -206,23 +209,23 @@ def validate_eic_format(eic_code: str) -> Dict[str, any]:
     errors: List[str] = []
 
     # Remove any hyphens/dashes (sometimes used for display)
-    eic_clean = eic_code.replace('-', '').replace(' ', '').upper()
+    eic_clean = eic_code.replace("-", "").replace(" ", "").upper()
 
     # Check length
     if len(eic_clean) != EIC_LENGTH:
         errors.append(f"Invalid EIC length: expected {EIC_LENGTH} characters, got {len(eic_clean)}")
-        return {'is_valid': False, 'errors': errors, 'components': None}
+        return {"is_valid": False, "errors": errors, "components": None}
 
     # Check character set
     if not re.match(EIC_FULL_PATTERN, eic_clean):
         errors.append("EIC contains invalid characters. Only 0-9 and A-Z are allowed")
-        return {'is_valid': False, 'errors': errors, 'components': None}
+        return {"is_valid": False, "errors": errors, "components": None}
 
     # Parse components
     components = parse_eic_components(eic_clean)
     if not components:
         errors.append("Failed to parse EIC components")
-        return {'is_valid': False, 'errors': errors, 'components': None}
+        return {"is_valid": False, "errors": errors, "components": None}
 
     # Validate office identifier
     if not re.match(OFFICE_ID_PATTERN, components.office_id):
@@ -241,10 +244,10 @@ def validate_eic_format(eic_code: str) -> Dict[str, any]:
         errors.append("Invalid check digit")
 
     is_valid = len(errors) == 0
-    return {'is_valid': is_valid, 'errors': errors, 'components': components if is_valid else None}
+    return {"is_valid": is_valid, "errors": errors, "components": components if is_valid else None}
 
 
-def is_valid_eic(eic_code: str) -> Dict[str, any]:
+def is_valid_eic(eic_code: str) -> Dict[str, Any]:
     """Main EIC validation function with comprehensive checks.
 
     This is the primary public API for EIC validation.
@@ -262,11 +265,11 @@ def is_valid_eic(eic_code: str) -> Dict[str, any]:
         }
     """
     result = validate_eic_format(eic_code)
-    eic_clean = eic_code.replace('-', '').replace(' ', '').upper()
+    eic_clean = eic_code.replace("-", "").replace(" ", "").upper()
 
     return {
-        'is_valid': result['is_valid'],
-        'eic_code': eic_clean if len(eic_clean) == EIC_LENGTH else eic_code,
-        'errors': result['errors'],
-        'components': result['components']
+        "is_valid": result["is_valid"],
+        "eic_code": eic_clean if len(eic_clean) == EIC_LENGTH else eic_code,
+        "errors": result["errors"],
+        "components": result["components"],
     }

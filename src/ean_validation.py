@@ -11,10 +11,8 @@ EAN Formats:
 Check Digit Algorithm: Mod 10 with alternating weights of 1 and 3
 """
 
-import re
-from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
-
+from typing import Any, Dict, List, Optional, Tuple
 
 # EAN Format Constants
 EAN_8_LENGTH = 8
@@ -23,12 +21,13 @@ EAN_14_LENGTH = 14
 VALID_EAN_LENGTHS = {EAN_8_LENGTH, EAN_13_LENGTH, EAN_14_LENGTH}
 
 # Regex pattern for EAN validation (numeric only)
-EAN_PATTERN = r'^\d+$'
+EAN_PATTERN = r"^\d+$"
 
 
 @dataclass
 class EANComponents:
     """EAN code components."""
+
     data_part: str
     check_digit: str
     format: str  # "EAN-8", "EAN-13", or "EAN-14"
@@ -41,6 +40,7 @@ class EANComponents:
 
 class EANValidationError(Exception):
     """Base exception for EAN validation errors."""
+
     pass
 
 
@@ -66,19 +66,21 @@ def _calculate_ean_check_digit(data_part: str) -> str:
 
     expected_lengths = {EAN_8_LENGTH - 1, EAN_13_LENGTH - 1, EAN_14_LENGTH - 1}
     if len(data_part) not in expected_lengths:
-        raise ValueError(
-            f"EAN data part must be 7, 12, or 13 digits long, got {len(data_part)}"
-        )
+        raise ValueError(f"EAN data part must be 7, 12, or 13 digits long, got {len(data_part)}")
 
     # Convert to list of integers
     digits = [int(d) for d in data_part]
 
     # Calculate weighted sum
-    # For EAN, we process from right to left with alternating weights of 3 and 1
+    # For EAN, positions are numbered from RIGHT to LEFT (GS1 standard)
+    # Odd positions from right (1st, 3rd, 5th...) get weight 3
+    # Even positions from right (2nd, 4th, 6th...) get weight 1
     total = 0
     for i, digit in enumerate(reversed(digits)):
-        # Odd positions (1st, 3rd, 5th from right) get weight 3
-        # Even positions (2nd, 4th, 6th from right) get weight 1
+        # i=0: position 1 from right (odd) → weight 3
+        # i=1: position 2 from right (even) → weight 1
+        # i=2: position 3 from right (odd) → weight 3
+        # etc.
         weight = 3 if i % 2 == 0 else 1
         total += digit * weight
 
@@ -163,16 +165,14 @@ def parse_ean_components(ean_code: str) -> Optional[EANComponents]:
 
     try:
         components = EANComponents(
-            data_part=ean_code[:-1],
-            check_digit=ean_code[-1],
-            format=format_map[length]
+            data_part=ean_code[:-1], check_digit=ean_code[-1], format=format_map[length]
         )
         return components
     except Exception:
         return None
 
 
-def validate_ean_format(ean_code: str) -> Dict[str, any]:
+def validate_ean_format(ean_code: str) -> Dict[str, Any]:
     """Validate the format of an EAN code with detailed error reporting.
 
     Args:
@@ -190,40 +190,23 @@ def validate_ean_format(ean_code: str) -> Dict[str, any]:
     errors: List[str] = []
 
     # Remove any spaces or hyphens (sometimes used for display)
-    ean_clean = ean_code.replace('-', '').replace(' ', '').strip()
+    ean_clean = ean_code.replace("-", "").replace(" ", "").strip()
 
     # Check if numeric
     if not ean_clean.isdigit():
         errors.append("EAN must contain only numeric digits (0-9)")
-        return {
-            'is_valid': False,
-            'format': None,
-            'errors': errors,
-            'components': None
-        }
+        return {"is_valid": False, "format": None, "errors": errors, "components": None}
 
     # Check length
     if len(ean_clean) not in VALID_EAN_LENGTHS:
-        errors.append(
-            f"Invalid EAN length: expected 8, 13, or 14 digits, got {len(ean_clean)}"
-        )
-        return {
-            'is_valid': False,
-            'format': None,
-            'errors': errors,
-            'components': None
-        }
+        errors.append(f"Invalid EAN length: expected 8, 13, or 14 digits, got {len(ean_clean)}")
+        return {"is_valid": False, "format": None, "errors": errors, "components": None}
 
     # Parse components
     components = parse_ean_components(ean_clean)
     if not components:
         errors.append("Failed to parse EAN components")
-        return {
-            'is_valid': False,
-            'format': None,
-            'errors': errors,
-            'components': None
-        }
+        return {"is_valid": False, "format": None, "errors": errors, "components": None}
 
     # Validate check digit
     if not validate_ean_check_digit(ean_clean):
@@ -231,10 +214,10 @@ def validate_ean_format(ean_code: str) -> Dict[str, any]:
 
     is_valid = len(errors) == 0
     return {
-        'is_valid': is_valid,
-        'format': components.format if is_valid else None,
-        'errors': errors,
-        'components': components if is_valid else None
+        "is_valid": is_valid,
+        "format": components.format if is_valid else None,
+        "errors": errors,
+        "components": components if is_valid else None,
     }
 
 
@@ -261,14 +244,14 @@ def validate_ean(ean_code: str) -> Tuple[bool, Optional[str], Optional[str]]:
     """
     result = validate_ean_format(ean_code)
 
-    if result['is_valid']:
-        return (True, result['format'], None)
+    if result["is_valid"]:
+        return (True, result["format"], None)
     else:
-        error_msg = "; ".join(result['errors'])
+        error_msg = "; ".join(result["errors"])
         return (False, None, error_msg)
 
 
-def is_valid_ean(ean_code: str) -> Dict[str, any]:
+def is_valid_ean(ean_code: str) -> Dict[str, Any]:
     """Comprehensive EAN validation function with detailed results.
 
     Alternative validation function that returns a dictionary with full details.
@@ -287,12 +270,12 @@ def is_valid_ean(ean_code: str) -> Dict[str, any]:
         }
     """
     result = validate_ean_format(ean_code)
-    ean_clean = ean_code.replace('-', '').replace(' ', '').strip()
+    ean_clean = ean_code.replace("-", "").replace(" ", "").strip()
 
     return {
-        'is_valid': result['is_valid'],
-        'ean_code': ean_clean,
-        'format': result['format'],
-        'errors': result['errors'],
-        'components': result['components']
+        "is_valid": result["is_valid"],
+        "ean_code": ean_clean,
+        "format": result["format"],
+        "errors": result["errors"],
+        "components": result["components"],
     }
