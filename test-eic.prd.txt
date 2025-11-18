@@ -1,0 +1,151 @@
+# PRD: EIC Number REST API Service 
+
+## Technical Architecture
+- **Backend:** Python (FastAPI recommended)
+- **Testing:** Python unittest or pytest
+- **API Spec:** OpenAPI 3 (auto-generated via FastAPI)
+- **Deployment:** Local or cloud (Docker optional)
+- **Dependencies:** None required for MVP, but extensible for EAN support
+
+---
+
+## Objective
+Build a REST API service that can:
+- Validate EIC (Energy Identification Code) numbers according to European standards
+- Generate valid EIC numbers from input parameters
+- Provide clear error messages for invalid codes
+- Be easily extended to support EAN codes in future iterations
+
+---
+
+## Context
+- EIC codes are used for unique identification of energy market entities across Europe.
+- The service should follow the official EIC Reference Manual for validation and generation logic[2](https://people.ey.com/personal/juraj_boldis_cz_ey_com/Documents/Soubory%20chatu%20Microsoft%20Copilot/EIC_EAN_podklad.md).
+- The API will be used by internal systems and potentially external clients for metering point management.
+
+---
+
+## Constraints
+- Must be implemented in Python
+- Must include unit tests for all core logic
+- Must expose endpoints as per OpenAPI 3 specification
+- Initial version focuses only on EIC, not EAN
+- No external dependencies unless justified for future extensibility
+
+---
+
+## Reasoning
+- Python is chosen for rapid prototyping and strong ecosystem support.
+- FastAPI is recommended for its automatic OpenAPI generation and async capabilities.
+- Unit tests ensure reliability and facilitate future refactoring.
+- OpenAPI 3 spec enables easy integration and documentation.
+
+---
+
+## Development Roadmap
+
+### MVP
+- Endpoint: `POST /eic/validate` – Validate EIC number
+- Endpoint: `POST /eic/generate` – Generate EIC number from parameters
+- Unit tests for validation and generation logic
+- OpenAPI 3 spec auto-generated
+
+### Future
+- Add EAN code support
+- Add authentication and rate limiting
+- Extend error handling and logging
+- Dockerize for deployment
+
+---
+
+## Logical Dependency Chain
+
+1. **Core Logic:** EIC validation and generation functions (including check digit algorithm)
+2. **API Endpoints:** REST endpoints for validate and generate
+3. **Unit Tests:** Test cases for all logic branches
+4. **OpenAPI Spec:** Ensure endpoints are documented and discoverable
+5. **Deployment:** Optional Docker setup
+
+---
+
+## Example API Spec (OpenAPI 3)
+
+```yaml
+openapi: 3.0.0
+info:
+  title: EIC Number Service
+  version: 1.0.0
+paths:
+  /eic/validate:
+    post:
+      summary: Validate EIC number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eic:
+                  type: string
+                  example: "27Z1234567890123"
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  error:
+                    type: string
+  /eic/generate:
+    post:
+      summary: Generate EIC number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                office:
+                  type: string
+                  example: "27"
+                entity_type:
+                  type: string
+                  example: "Z"
+                identifier:
+                  type: string
+                  example: "123456789012"
+      responses:
+        '200':
+          description: Generated EIC number
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  eic:
+                    type: string
+```
+
+---
+
+## References
+
+- https://www.entsoe.eu/data/energy-identification-codes-eic/[2](https://people.ey.com/personal/juraj_boldis_cz_ey_com/Documents/Soubory%20chatu%20Microsoft%20Copilot/EIC_EAN_podklad.md)
+- https://eepublicdownloads.entsoe.eu/clean-documents/EDI/Library/old-downloads/ENTSOE_LIO_Management.pdf[2](https://people.ey.com/personal/juraj_boldis_cz_ey_com/Documents/Soubory%20chatu%20Microsoft%20Copilot/EIC_EAN_podklad.md)
+- https://www.gs1cz.org/[2](https://people.ey.com/personal/juraj_boldis_cz_ey_com/Documents/Soubory%20chatu%20Microsoft%20Copilot/EIC_EAN_podklad.md)
+- [Task Master PRD Guide](https://www.tipsntutorials.com/what-is-a-prd-file-in-task-master-complete-guide-examples/)[1](https://www.tipsntutorials.com/what-is-a-prd-file-in-task-master-complete-guide-examples/)
+
+---
+
+## Next Steps
+
+- Specify and implement the EIC check digit algorithm
+- Build the FastAPI skeleton with endpoints and OpenAPI spec
+- Write unit tests for all logic
+- Iterate and expand PRD as requirements evolve
