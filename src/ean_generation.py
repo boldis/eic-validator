@@ -7,7 +7,7 @@ import secrets
 import string
 from typing import Literal
 
-from .ean_validation import calculate_ean_check_digit, validate_ean
+from .ean_validation import calculate_ean_check_digit
 
 
 # Valid EAN types

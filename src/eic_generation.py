@@ -7,7 +7,7 @@ import secrets
 import string
 from typing import Set
 
-from .eic_validation import calculate_eic_check_digit, is_valid_eic
+from .eic_validation import calculate_eic_check_digit
 
 
 # ENTSO-E valid country codes (2-character codes)

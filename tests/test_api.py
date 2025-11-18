@@ -1,6 +1,5 @@
 """API integration tests for EIC and EAN validation and generation endpoints."""
 
-import pytest
 from fastapi.testclient import TestClient
 from src.main import app
 from src.eic_validation import is_valid_eic

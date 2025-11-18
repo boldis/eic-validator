@@ -9,8 +9,6 @@ from src.eic_validation import (
     is_valid_eic,
     _char_to_value,
     _value_to_char,
-    EIC_LENGTH,
-    EIC_BASE_LENGTH,
 )
 
 
@@ -189,7 +187,6 @@ class TestValidateEICFormat:
         """Test that hyphens are properly stripped."""
         base = "27XGOEPS0000001"
         check = calculate_eic_check_digit(base)
-        eic_clean = base + check
         eic_with_hyphens = "27X-GOEP-S000-0001" + check
         result = validate_eic_format(eic_with_hyphens)
         # Should validate correctly after stripping hyphens

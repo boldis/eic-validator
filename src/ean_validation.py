@@ -11,7 +11,6 @@ EAN Formats:
 Check Digit Algorithm: Mod 10 with alternating weights of 1 and 3
 """
 
-import re
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 

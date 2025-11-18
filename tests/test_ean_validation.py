@@ -8,10 +8,6 @@ from src.ean_validation import (
     parse_ean_components,
     validate_ean_format,
     is_valid_ean,
-    _calculate_ean_check_digit,
-    EAN_8_LENGTH,
-    EAN_13_LENGTH,
-    EAN_14_LENGTH,
 )
 
 

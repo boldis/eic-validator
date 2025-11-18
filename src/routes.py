@@ -1,7 +1,6 @@
 """API routes for EIC validation and generation."""
 
 from fastapi import APIRouter, HTTPException, status
-from typing import Dict, Any
 
 from .models import (
     EICValidationRequest,

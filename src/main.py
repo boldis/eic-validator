@@ -10,7 +10,10 @@ from .routes import router as eic_router, ean_router
 
 app = FastAPI(
     title="EIC/EAN Validation Service",
-    description="API for validating Energy Identification Codes (EIC) and European Article Numbers (EAN) according to ENTSO-E standards",
+    description=(
+        "API for validating Energy Identification Codes (EIC) and "
+        "European Article Numbers (EAN) according to ENTSO-E standards"
+    ),
     version="0.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
