@@ -1,0 +1,91 @@
+name: Generate OpenAPI Specification
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'src/**'
+      - 'requirements.txt'
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - 'src/**'
+      - 'requirements.txt'
+  workflow_dispatch:
+
+jobs:
+  generate-openapi:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyyaml
+
+    - name: Generate OpenAPI JSON
+      run: |
+        python -c "
+        from src.main import app
+        import json
+
+        openapi_schema = app.openapi()
+        with open('openapi.json', 'w') as f:
+            json.dump(openapi_schema, f, indent=2)
+
+        print('✅ OpenAPI JSON specification generated successfully')
+        "
+
+    - name: Generate OpenAPI YAML
+      run: |
+        python -c "
+        import json
+        import yaml
+
+        with open('openapi.json', 'r') as f:
+            openapi_data = json.load(f)
+
+        with open('openapi.yaml', 'w') as f:
+            yaml.dump(openapi_data, f, default_flow_style=False, sort_keys=False)
+
+        print('✅ OpenAPI YAML specification generated successfully')
+        "
+
+    - name: Check for changes
+      id: check_changes
+      run: |
+        git diff --exit-code openapi.json openapi.yaml || echo "changed=true" >> $GITHUB_OUTPUT
+
+    - name: Commit and push OpenAPI spec
+      if: steps.check_changes.outputs.changed == 'true' && github.event_name == 'push'
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add openapi.json openapi.yaml
+        git commit -m "chore: update OpenAPI specification [skip ci]"
+        git push
+
+    - name: Upload OpenAPI specs as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: openapi-specifications
+        path: |
+          openapi.json
+          openapi.yaml
+        retention-days: 30
