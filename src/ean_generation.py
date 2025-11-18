@@ -16,11 +16,13 @@ EANType = Literal["EAN-8", "EAN-13", "EAN-14"]
 
 class InvalidEANTypeError(ValueError):
     """Exception raised for invalid EAN types."""
+
     pass
 
 
 class InvalidBaseCodeError(ValueError):
     """Exception raised for invalid base codes."""
+
     pass
 
 
@@ -100,7 +102,7 @@ def _generate_random_base(ean_type: str) -> str:
 
     length = length_map[ean_type]
     # Generate random digits
-    base_code = ''.join(secrets.choice(string.digits) for _ in range(length))
+    base_code = "".join(secrets.choice(string.digits) for _ in range(length))
     return base_code
 
 

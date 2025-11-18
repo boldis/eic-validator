@@ -17,36 +17,36 @@ class TestCharacterConversion:
 
     def test_char_to_value_digits(self):
         """Test conversion of digit characters."""
-        assert _char_to_value('0') == 0
-        assert _char_to_value('5') == 5
-        assert _char_to_value('9') == 9
+        assert _char_to_value("0") == 0
+        assert _char_to_value("5") == 5
+        assert _char_to_value("9") == 9
 
     def test_char_to_value_letters(self):
         """Test conversion of letter characters."""
-        assert _char_to_value('A') == 10
-        assert _char_to_value('B') == 11
-        assert _char_to_value('Z') == 35
+        assert _char_to_value("A") == 10
+        assert _char_to_value("B") == 11
+        assert _char_to_value("Z") == 35
 
     def test_char_to_value_invalid(self):
         """Test that invalid characters raise ValueError."""
         with pytest.raises(ValueError, match="Invalid character"):
-            _char_to_value('a')  # lowercase
+            _char_to_value("a")  # lowercase
         with pytest.raises(ValueError, match="Invalid character"):
-            _char_to_value('-')
+            _char_to_value("-")
         with pytest.raises(ValueError, match="Invalid character"):
-            _char_to_value(' ')
+            _char_to_value(" ")
 
     def test_value_to_char_digits(self):
         """Test conversion of numeric values to digit characters."""
-        assert _value_to_char(0) == '0'
-        assert _value_to_char(5) == '5'
-        assert _value_to_char(9) == '9'
+        assert _value_to_char(0) == "0"
+        assert _value_to_char(5) == "5"
+        assert _value_to_char(9) == "9"
 
     def test_value_to_char_letters(self):
         """Test conversion of numeric values to letter characters."""
-        assert _value_to_char(10) == 'A'
-        assert _value_to_char(11) == 'B'
-        assert _value_to_char(35) == 'Z'
+        assert _value_to_char(10) == "A"
+        assert _value_to_char(11) == "B"
+        assert _value_to_char(35) == "Z"
 
     def test_value_to_char_invalid(self):
         """Test that invalid values raise ValueError."""
@@ -92,7 +92,7 @@ class TestCheckDigitCalculation:
         base = "0" * 15
         check_digit = calculate_eic_check_digit(base)
         # With all zeros, remainder = 0, so check_digit = (37-0)%37 = 37%37 = 0 -> '0'
-        assert check_digit == '0'
+        assert check_digit == "0"
 
     def test_calculate_check_digit_all_nines(self):
         """Test with all nines."""
@@ -128,7 +128,7 @@ class TestCheckDigitValidation:
         base = "27XGOEPS0000001"
         correct_check = calculate_eic_check_digit(base)
         # Use a different check digit
-        wrong_check = '0' if correct_check != '0' else '1'
+        wrong_check = "0" if correct_check != "0" else "1"
         invalid_code = base + wrong_check
         assert validate_eic_check_digit(invalid_code) is False
 
@@ -179,9 +179,9 @@ class TestValidateEICFormat:
         check = calculate_eic_check_digit(base)
         eic = base + check
         result = validate_eic_format(eic)
-        assert result['is_valid'] is True
-        assert len(result['errors']) == 0
-        assert result['components'] is not None
+        assert result["is_valid"] is True
+        assert len(result["errors"]) == 0
+        assert result["components"] is not None
 
     def test_validate_format_with_hyphens(self):
         """Test that hyphens are properly stripped."""
@@ -190,29 +190,29 @@ class TestValidateEICFormat:
         eic_with_hyphens = "27X-GOEP-S000-0001" + check
         result = validate_eic_format(eic_with_hyphens)
         # Should validate correctly after stripping hyphens
-        assert len(result['errors']) == 0 or 'Invalid EIC length' in result['errors'][0]
+        assert len(result["errors"]) == 0 or "Invalid EIC length" in result["errors"][0]
 
     def test_validate_format_wrong_length(self):
         """Test that wrong length is detected."""
         result = validate_eic_format("TOOSHORT")
-        assert result['is_valid'] is False
-        assert any('length' in err.lower() for err in result['errors'])
+        assert result["is_valid"] is False
+        assert any("length" in err.lower() for err in result["errors"])
 
     def test_validate_format_invalid_characters(self):
         """Test that invalid characters are detected."""
         result = validate_eic_format("27XG000000000-1Z")  # Contains hyphen in wrong place
         # After stripping, it should be too short
-        assert result['is_valid'] is False
+        assert result["is_valid"] is False
 
     def test_validate_format_wrong_check_digit(self):
         """Test that incorrect check digit is detected."""
         base = "27XGOEPS0000001"
         correct_check = calculate_eic_check_digit(base)
-        wrong_check = '0' if correct_check != '0' else '1'
+        wrong_check = "0" if correct_check != "0" else "1"
         eic = base + wrong_check
         result = validate_eic_format(eic)
-        assert result['is_valid'] is False
-        assert any('check digit' in err.lower() for err in result['errors'])
+        assert result["is_valid"] is False
+        assert any("check digit" in err.lower() for err in result["errors"])
 
     def test_validate_format_lowercase_accepted(self):
         """Test that lowercase is converted to uppercase."""
@@ -222,14 +222,14 @@ class TestValidateEICFormat:
         eic_lower = eic_upper.lower()
         result = validate_eic_format(eic_lower)
         # Should work after uppercase conversion
-        assert result['is_valid'] is True or len(result['errors']) > 0
+        assert result["is_valid"] is True or len(result["errors"]) > 0
 
     def test_validate_format_all_error_types(self):
         """Test detection of multiple error types."""
         # Too short AND invalid characters
         result = validate_eic_format("abc-123")
-        assert result['is_valid'] is False
-        assert len(result['errors']) > 0
+        assert result["is_valid"] is False
+        assert len(result["errors"]) > 0
 
 
 class TestIsValidEIC:
@@ -241,17 +241,17 @@ class TestIsValidEIC:
         check = calculate_eic_check_digit(base)
         eic = base + check
         result = is_valid_eic(eic)
-        assert result['is_valid'] is True
-        assert len(result['errors']) == 0
-        assert result['eic_code'] == eic
-        assert result['components'] is not None
+        assert result["is_valid"] is True
+        assert len(result["errors"]) == 0
+        assert result["eic_code"] == eic
+        assert result["components"] is not None
 
     def test_is_valid_eic_invalid_code(self):
         """Test complete validation of invalid EIC."""
         result = is_valid_eic("INVALID123")
-        assert result['is_valid'] is False
-        assert len(result['errors']) > 0
-        assert result['components'] is None
+        assert result["is_valid"] is False
+        assert len(result["errors"]) > 0
+        assert result["components"] is None
 
     def test_is_valid_eic_with_spaces(self):
         """Test that spaces are handled."""
@@ -260,14 +260,14 @@ class TestIsValidEIC:
         eic = base + check
         eic_with_spaces = " " + eic + " "
         result = is_valid_eic(eic_with_spaces)
-        assert result['eic_code'] == eic
+        assert result["eic_code"] == eic
 
     def test_is_valid_eic_detailed_errors(self):
         """Test that detailed error messages are provided."""
         result = is_valid_eic("12345")
-        assert result['is_valid'] is False
-        assert any(isinstance(err, str) for err in result['errors'])
-        assert len(result['errors']) > 0
+        assert result["is_valid"] is False
+        assert any(isinstance(err, str) for err in result["errors"])
+        assert len(result["errors"]) > 0
 
 
 class TestEdgeCases:
@@ -276,22 +276,22 @@ class TestEdgeCases:
     def test_empty_string(self):
         """Test with empty string."""
         result = is_valid_eic("")
-        assert result['is_valid'] is False
+        assert result["is_valid"] is False
 
     def test_only_whitespace(self):
         """Test with only whitespace."""
         result = is_valid_eic("   ")
-        assert result['is_valid'] is False
+        assert result["is_valid"] is False
 
     def test_special_characters(self):
         """Test with special characters."""
         result = is_valid_eic("27XG@#$%^&*()123")
-        assert result['is_valid'] is False
+        assert result["is_valid"] is False
 
     def test_unicode_characters(self):
         """Test with unicode characters."""
         result = is_valid_eic("27XGöäü000000012")
-        assert result['is_valid'] is False
+        assert result["is_valid"] is False
 
     def test_numeric_only(self):
         """Test with only numeric characters (valid in format)."""
@@ -299,7 +299,7 @@ class TestEdgeCases:
         check = calculate_eic_check_digit(base)
         eic = base + check
         result = is_valid_eic(eic)
-        assert result['is_valid'] is True
+        assert result["is_valid"] is True
 
     def test_alpha_only(self):
         """Test with only alphabetic characters."""
@@ -307,7 +307,7 @@ class TestEdgeCases:
         check = calculate_eic_check_digit(base)
         eic = base + check
         result = is_valid_eic(eic)
-        assert result['is_valid'] is True
+        assert result["is_valid"] is True
 
 
 class TestRealWorldExamples:
@@ -319,15 +319,15 @@ class TestRealWorldExamples:
         check = calculate_eic_check_digit(base)
         eic = base + check
         result = is_valid_eic(eic)
-        assert result['is_valid'] is True
-        assert result['components'].office_id == "27"
+        assert result["is_valid"] is True
+        assert result["components"].office_id == "27"
 
     def test_different_entity_types(self):
         """Test with different entity type codes."""
-        for entity_type in ['A', 'Z', 'Y', 'W', '1', '5']:
+        for entity_type in ["A", "Z", "Y", "W", "1", "5"]:
             base = f"27{entity_type}GOEPS0000001"
             check = calculate_eic_check_digit(base)
             eic = base + check
             result = is_valid_eic(eic)
-            assert result['is_valid'] is True
-            assert result['components'].entity_type == entity_type
+            assert result["is_valid"] is True
+            assert result["components"].entity_type == entity_type

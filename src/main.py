@@ -73,8 +73,8 @@ async def root():
             "eic_generate": "/eic/generate",
             "eic_generate_bulk": "/eic/generate/bulk",
             "ean_validate": "/ean/validate",
-            "ean_generate": "/ean/generate"
-        }
+            "ean_generate": "/ean/generate",
+        },
     }
 
 
@@ -86,4 +86,5 @@ async def health():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

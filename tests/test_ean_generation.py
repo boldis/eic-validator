@@ -307,7 +307,9 @@ class TestIntegrationWithValidation:
             for _ in range(20):  # Test multiple times
                 ean = generate_random_ean(ean_type)
                 is_valid, format_type, error = validate_ean(ean)
-                assert is_valid is True, f"Generated {ean_type} {ean} should be valid, error: {error}"
+                assert (
+                    is_valid is True
+                ), f"Generated {ean_type} {ean} should be valid, error: {error}"
                 assert format_type == ean_type
 
     def test_bulk_generation_all_valid(self):

@@ -140,7 +140,9 @@ class TestEANValidation:
 
     def test_validate_ean14_valid(self):
         """Test validation of valid EAN-14."""
-        is_valid, format_type, error = validate_ean("04006381333931")  # Fixed: correct check digit is 1
+        is_valid, format_type, error = validate_ean(
+            "04006381333931"
+        )  # Fixed: correct check digit is 1
         assert is_valid is True
         assert format_type == "EAN-14"
         assert error is None
@@ -197,34 +199,34 @@ class TestEANFormatValidation:
     def test_format_validation_valid_ean8(self):
         """Test format validation for valid EAN-8."""
         result = validate_ean_format("12345670")
-        assert result['is_valid'] is True
-        assert result['format'] == "EAN-8"
-        assert len(result['errors']) == 0
-        assert result['components'] is not None
+        assert result["is_valid"] is True
+        assert result["format"] == "EAN-8"
+        assert len(result["errors"]) == 0
+        assert result["components"] is not None
 
     def test_format_validation_valid_ean13(self):
         """Test format validation for valid EAN-13."""
         result = validate_ean_format("4006381333931")
-        assert result['is_valid'] is True
-        assert result['format'] == "EAN-13"
-        assert len(result['errors']) == 0
+        assert result["is_valid"] is True
+        assert result["format"] == "EAN-13"
+        assert len(result["errors"]) == 0
 
     def test_format_validation_invalid_check_digit(self):
         """Test format validation detects invalid check digit."""
         result = validate_ean_format("12345679")
-        assert result['is_valid'] is False
-        assert "Invalid check digit" in result['errors']
+        assert result["is_valid"] is False
+        assert "Invalid check digit" in result["errors"]
 
     def test_format_validation_non_numeric(self):
         """Test format validation detects non-numeric input."""
         result = validate_ean_format("ABC12345")
-        assert result['is_valid'] is False
-        assert any("numeric digits" in err for err in result['errors'])
+        assert result["is_valid"] is False
+        assert any("numeric digits" in err for err in result["errors"])
 
     def test_format_validation_spaces_cleaned(self):
         """Test that spaces are properly cleaned before validation."""
         result = validate_ean_format("  12345670  ")
-        assert result['is_valid'] is True
+        assert result["is_valid"] is True
 
 
 class TestIsValidEAN:
@@ -233,29 +235,29 @@ class TestIsValidEAN:
     def test_is_valid_ean_valid_ean8(self):
         """Test comprehensive validation for valid EAN-8."""
         result = is_valid_ean("12345670")
-        assert result['is_valid'] is True
-        assert result['ean_code'] == "12345670"
-        assert result['format'] == "EAN-8"
-        assert len(result['errors']) == 0
-        assert result['components'] is not None
+        assert result["is_valid"] is True
+        assert result["ean_code"] == "12345670"
+        assert result["format"] == "EAN-8"
+        assert len(result["errors"]) == 0
+        assert result["components"] is not None
 
     def test_is_valid_ean_valid_ean13(self):
         """Test comprehensive validation for valid EAN-13."""
         result = is_valid_ean("4006381333931")
-        assert result['is_valid'] is True
-        assert result['ean_code'] == "4006381333931"
-        assert result['format'] == "EAN-13"
+        assert result["is_valid"] is True
+        assert result["ean_code"] == "4006381333931"
+        assert result["format"] == "EAN-13"
 
     def test_is_valid_ean_invalid(self):
         """Test comprehensive validation for invalid EAN."""
         result = is_valid_ean("12345679")
-        assert result['is_valid'] is False
-        assert len(result['errors']) > 0
+        assert result["is_valid"] is False
+        assert len(result["errors"]) > 0
 
     def test_is_valid_ean_normalized(self):
         """Test that EAN code is normalized in response."""
         result = is_valid_ean(" 1234-5670 ")
-        assert result['ean_code'] == "12345670"
+        assert result["ean_code"] == "12345670"
 
 
 class TestEdgeCases:
