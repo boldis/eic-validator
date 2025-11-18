@@ -139,21 +139,21 @@ def calculate_eic_check_digit(code_without_check: str) -> str:
 
 ### Algoritmus kontrolního znaku (GS1 Mod 10)
 
-Podle GS1 standardu se pozice číslují **zleva doprava** (1, 2, 3, ...):
+Podle GS1 standardu se pozice číslují **zprava doleva** (od konce):
 
-1. **Sečíst číslice na sudých pozicích zleva** (2, 4, 6, ...) a **vynásobit 3**
-2. **Sečíst číslice na lichých pozicích zleva** (1, 3, 5, ...)
+1. **Sečíst číslice na lichých pozicích zprava** (1., 3., 5., ... od konce) a **vynásobit 3**
+2. **Sečíst číslice na sudých pozicích zprava** (2., 4., 6., ... od konce)
 3. **Sečíst oba výsledky**
 4. **Kontrolní číslice** = `(10 - (součet mod 10)) mod 10`
 
 **Příklad pro `400638133393`:**
 ```
-Pozice zleva:  1  2  3  4  5  6  7  8  9 10 11 12
-Číslice:       4  0  0  6  3  8  1  3  3  3  9  3
+Pozice zprava: 12 11 10  9  8  7  6  5  4  3  2  1
+Číslice:        4  0  0  6  3  8  1  3  3  3  9  3
 
-Liché pozice zleva (1,3,5,7,9,11):  4+0+3+1+3+9 = 20
-Sudé pozice zleva (2,4,6,8,10,12):  0+6+8+3+3+3 = 23 → 23 × 3 = 69
-Součet: 20 + 69 = 89
+Liché pozice zprava (1,3,5,7,9,11):  3+3+3+8+6+0 = 23 → 23 × 3 = 69
+Sudé pozice zprava (2,4,6,8,10,12):  9+3+1+3+0+4 = 20
+Součet: 69 + 20 = 89
 Kontrolní číslice: (10 - (89 mod 10)) mod 10 = (10 - 9) mod 10 = 1
 
 Výsledek: 4006381333931
@@ -166,11 +166,11 @@ def calculate_ean_check_digit(code_without_check: str) -> str:
     digits = [int(d) for d in code_without_check]
     total = 0
 
-    # Procházíme zleva doprava
-    for i, digit in enumerate(digits):
-        # Sudé pozice (index 1, 3, 5...) dostanou váhu 3
-        # Liché pozice (index 0, 2, 4...) dostanou váhu 1
-        weight = 3 if i % 2 == 1 else 1
+    # Procházíme zprava doleva (reversed)
+    for i, digit in enumerate(reversed(digits)):
+        # Liché pozice zprava (1., 3., 5., ...) dostanou váhu 3
+        # Sudé pozice zprava (2., 4., 6., ...) dostanou váhu 1
+        weight = 3 if i % 2 == 0 else 1
         total += digit * weight
 
     check_digit = (10 - (total % 10)) % 10

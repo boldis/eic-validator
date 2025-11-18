@@ -74,17 +74,16 @@ def _calculate_ean_check_digit(data_part: str) -> str:
     digits = [int(d) for d in data_part]
 
     # Calculate weighted sum
-    # For EAN, we process from left to right (GS1 standard)
-    # Positions are numbered 1, 2, 3, ... from left to right
-    # Even positions (2, 4, 6, ...) get weight 3
-    # Odd positions (1, 3, 5, ...) get weight 1
+    # For EAN, positions are numbered from RIGHT to LEFT (GS1 standard)
+    # Odd positions from right (1st, 3rd, 5th...) get weight 3
+    # Even positions from right (2nd, 4th, 6th...) get weight 1
     total = 0
-    for i, digit in enumerate(digits):
-        # Index 0 = position 1 (odd) → weight 1
-        # Index 1 = position 2 (even) → weight 3
-        # Index 2 = position 3 (odd) → weight 1
+    for i, digit in enumerate(reversed(digits)):
+        # i=0: position 1 from right (odd) → weight 3
+        # i=1: position 2 from right (even) → weight 1
+        # i=2: position 3 from right (odd) → weight 3
         # etc.
-        weight = 3 if i % 2 == 1 else 1
+        weight = 3 if i % 2 == 0 else 1
         total += digit * weight
 
     # Calculate check digit

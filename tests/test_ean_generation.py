@@ -253,7 +253,7 @@ class TestKnownEANs:
         """Test generation matches known EAN-13 codes."""
         test_cases = [
             ("400638133393", "4006381333931"),
-            ("501234567890", "5012345678905"),
+            ("501234567890", "5012345678900"),  # Fixed: correct check digit is 0
         ]
 
         for base_code, expected_ean in test_cases:

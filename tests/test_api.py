@@ -424,7 +424,7 @@ class TestEANValidationEndpoint:
         """Test validation of a valid EAN-14 code."""
         response = client.post(
             "/ean/validate",
-            json={"ean_code": "04006381333938"}
+            json={"ean_code": "04006381333931"}  # Fixed: correct check digit is 1
         )
         assert response.status_code == 200
         data = response.json()
