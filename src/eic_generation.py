@@ -9,7 +9,6 @@ from typing import Set
 
 from .eic_validation import calculate_eic_check_digit
 
-
 # ENTSO-E valid country codes (2-character codes)
 # Based on European countries participating in ENTSO-E
 VALID_COUNTRY_CODES: Set[str] = {

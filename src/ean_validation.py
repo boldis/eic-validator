@@ -11,9 +11,8 @@ EAN Formats:
 Check Digit Algorithm: Mod 10 with alternating weights of 1 and 3
 """
 
-from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
-
+from typing import Any, Dict, List, Optional, Tuple
 
 # EAN Format Constants
 EAN_8_LENGTH = 8

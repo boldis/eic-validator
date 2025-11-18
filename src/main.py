@@ -1,12 +1,12 @@
 """Main FastAPI application entry point for EIC/EAN validation service."""
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi import Request, status
-from fastapi.exceptions import RequestValidationError
 
-from .routes import router as eic_router, ean_router
+from .routes import ean_router
+from .routes import router as eic_router
 
 app = FastAPI(
     title="EIC/EAN Validation Service",

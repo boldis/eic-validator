@@ -1,14 +1,15 @@
 """Comprehensive unit tests for EIC validation logic."""
 
 import pytest
+
 from src.eic_validation import (
-    calculate_eic_check_digit,
-    validate_eic_check_digit,
-    parse_eic_components,
-    validate_eic_format,
-    is_valid_eic,
     _char_to_value,
     _value_to_char,
+    calculate_eic_check_digit,
+    is_valid_eic,
+    parse_eic_components,
+    validate_eic_check_digit,
+    validate_eic_format,
 )
 
 

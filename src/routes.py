@@ -1,30 +1,26 @@
 """API routes for EIC validation and generation."""
 
 from fastapi import APIRouter, HTTPException, status
+from pydantic import BaseModel, Field
 
-from .models import (
-    EICValidationRequest,
-    EICValidationResult,
-    EICComponentsResponse,
-    EANValidationRequest,
-    EANValidationResponse,
-    EANGenerationRequest,
-    EANGenerationResponse,
-)
-from .eic_validation import is_valid_eic
+from .ean_generation import InvalidBaseCodeError, InvalidEANTypeError, generate_ean
+from .ean_validation import validate_ean
 from .eic_generation import (
-    generate_eic,
-    generate_multiple_eics,
     InvalidCountryCodeError,
     InvalidEntityTypeError,
+    generate_eic,
+    generate_multiple_eics,
 )
-from .ean_validation import validate_ean
-from .ean_generation import (
-    generate_ean,
-    InvalidEANTypeError,
-    InvalidBaseCodeError,
+from .eic_validation import is_valid_eic
+from .models import (
+    EANGenerationRequest,
+    EANGenerationResponse,
+    EANValidationRequest,
+    EANValidationResponse,
+    EICComponentsResponse,
+    EICValidationRequest,
+    EICValidationResult,
 )
-from pydantic import BaseModel, Field
 
 
 # EIC Generation Models

@@ -9,7 +9,6 @@ from typing import Literal
 
 from .ean_validation import calculate_ean_check_digit
 
-
 # Valid EAN types
 EANType = Literal["EAN-8", "EAN-13", "EAN-14"]
 

@@ -1,17 +1,18 @@
 """Comprehensive unit tests for EIC generation logic."""
 
 import pytest
+
 from src.eic_generation import (
+    VALID_COUNTRY_CODES,
+    VALID_ENTITY_TYPES,
+    InvalidCountryCodeError,
+    InvalidEntityTypeError,
+    _generate_base_identifier,
+    _validate_eic_generation_params,
     generate_eic,
     generate_multiple_eics,
     is_valid_country_code,
     is_valid_entity_type,
-    _generate_base_identifier,
-    _validate_eic_generation_params,
-    InvalidCountryCodeError,
-    InvalidEntityTypeError,
-    VALID_COUNTRY_CODES,
-    VALID_ENTITY_TYPES,
 )
 from src.eic_validation import is_valid_eic
 

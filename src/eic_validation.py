@@ -11,9 +11,8 @@ EIC Format: XXYAAAAAAAAAAAAK (16 characters)
 """
 
 import re
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
-
+from typing import Any, Dict, List, Optional
 
 # EIC Format Constants
 EIC_LENGTH = 16

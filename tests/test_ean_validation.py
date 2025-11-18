@@ -1,13 +1,14 @@
 """Comprehensive unit tests for EAN validation logic."""
 
 import pytest
+
 from src.ean_validation import (
     calculate_ean_check_digit,
-    validate_ean_check_digit,
-    validate_ean,
-    parse_ean_components,
-    validate_ean_format,
     is_valid_ean,
+    parse_ean_components,
+    validate_ean,
+    validate_ean_check_digit,
+    validate_ean_format,
 )
 
 

@@ -1,15 +1,16 @@
 """Comprehensive unit tests for EAN generation logic."""
 
 import pytest
+
 from src.ean_generation import (
-    generate_ean,
-    generate_random_ean,
-    generate_multiple_eans,
-    is_valid_ean_type,
-    InvalidEANTypeError,
     InvalidBaseCodeError,
-    _validate_base_code,
+    InvalidEANTypeError,
     _generate_random_base,
+    _validate_base_code,
+    generate_ean,
+    generate_multiple_eans,
+    generate_random_ean,
+    is_valid_ean_type,
 )
 from src.ean_validation import validate_ean
 

@@ -1,10 +1,10 @@
 """API integration tests for EIC and EAN validation and generation endpoints."""
 
 from fastapi.testclient import TestClient
-from src.main import app
-from src.eic_validation import is_valid_eic
-from src.ean_validation import validate_ean
 
+from src.ean_validation import validate_ean
+from src.eic_validation import is_valid_eic
+from src.main import app
 
 client = TestClient(app)
 
