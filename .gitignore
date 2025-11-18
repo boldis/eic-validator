@@ -10,7 +10,13 @@ dev-debug.log
 node_modules/
 
 # Environment variables
-.env
+.env*
+
+# Taskmaster and claude
+.taskmaster/*
+.claude/*
+.mcp*
+CLAUDE.md
 
 # Editor directories and files
 .idea
@@ -93,3 +99,4 @@ coverage.xml
 
 # Profiling data
 .prof
+
