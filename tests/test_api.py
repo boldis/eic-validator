@@ -493,9 +493,10 @@ class TestEANValidationEndpoint:
             "/ean/validate",
             json={"ean_code": ""}
         )
-        assert response.status_code == 200
+        # Empty string fails Pydantic validation (min_length=1 after strip)
+        assert response.status_code == 422
         data = response.json()
-        assert data["is_valid"] is False
+        assert "error" in data
 
 
 class TestEANGenerationEndpoint:
@@ -556,7 +557,8 @@ class TestEANGenerationEndpoint:
             "/ean/generate",
             json={"base_code": "123456", "ean_type": "EAN-8"}  # Too short
         )
-        assert response.status_code == 400
+        # Pydantic field validator returns 422 for validation errors
+        assert response.status_code == 422
         data = response.json()
         assert "detail" in data
 

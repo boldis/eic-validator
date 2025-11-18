@@ -30,7 +30,7 @@ class TestCheckDigitCalculation:
         # Known valid EAN-13 codes
         assert calculate_ean_check_digit("400638133393") == "1"
         assert calculate_ean_check_digit("501234567890") == "0"  # Fixed: correct check digit is 0
-        assert calculate_ean_check_digit("978014300723") == "2"
+        assert calculate_ean_check_digit("978014300723") == "4"  # Fixed: correct check digit is 4
 
     def test_ean14_check_digit_calculation(self):
         """Test EAN-14 check digit calculation with known values."""

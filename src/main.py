@@ -31,11 +31,22 @@ app.add_middleware(
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """Handle validation errors with detailed error messages."""
+    # Convert errors to JSON-serializable format
+    errors = []
+    for error in exc.errors():
+        error_dict = dict(error)
+        # Convert ValueError in ctx to string
+        if "ctx" in error_dict and "error" in error_dict["ctx"]:
+            ctx_error = error_dict["ctx"]["error"]
+            if isinstance(ctx_error, ValueError):
+                error_dict["ctx"]["error"] = str(ctx_error)
+        errors.append(error_dict)
+
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={
             "error": "Validation Error",
-            "detail": exc.errors(),
+            "detail": errors,
         },
     )
 
